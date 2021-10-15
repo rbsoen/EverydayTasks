@@ -25,30 +25,14 @@
             $this->date_time = $date_time;
         }
 
-        public function getSubject(): string
-        {
-            return $this->subject;
-        }
+        // generic getter functions
+        public function getSubject(): string { return $this->subject; }
+        public function getDescription(): string { return $this->description; }
+        public function getID(): string { return $this->id; }
 
-        public function getDescription(): string
-        {
-            return $this->description;
-        }
-
-        public function getID(): string
-        {
-            return $this->id;
-        }
-
-        public function setSubject(string $subject)
-        {
-            $this->subject = Util::sanitize($subject);
-        }
-
-        public function setDescription(string $description)
-        {
-            $this->description = Util::sanitize($description);
-        }
+        // setter functions with sanitizing
+        public function setSubject(string $subject) { $this->subject = Util::sanitize($subject); }
+        public function setDescription(string $description) { $this->description = Util::sanitize($description); }
 
         /**
          * Inserts the Activity object to the actual database
@@ -58,21 +42,34 @@
                 insert into activities(id, subject, description, date_time)
                 values (:id, :subject, :description, :date_time);
             ');
-            $query->execute($this->serialize());
+            $query->execute($this->toArray());
         }
 
         /**
          * Replaces an existing entry in the database with one of the same ID
+         * @return bool Whether or not replacement succeeded
          */
-        public function replaceDatabaseEntry(): bool{
+        public function replaceDatabaseEntry(): bool {
             $query = $this->db->prepare('
                 update activities
                     set subject=:subject, description=:description, date_time=:date_time
                 where id = :id
             ');
-            $query->execute($this->serialize());
+            $query->execute($this->toArray());
             return (bool)$query->rowCount();
+        }
 
+        /**
+         * Deletes the entry from the database.
+         * @return bool Whether or not deletion succeeded
+         */
+        public function deleteFromDatabase(): bool {
+            $query = $this->db->prepare('
+                delete from activities
+                    where id = :id
+            ');
+            $query->execute(['id'=>$this->id]);
+            return (bool)$query->rowCount();
         }
 
         /**
@@ -81,7 +78,7 @@
          * @param string $id The activity ID
          * @return Activity|null Activity, if there is one with the requested ID
          */
-        public static function searchById(\PDO $db, string $id){
+        public static function searchById(\PDO $db, string $id): Activity | null {
             $query = $db->prepare('
                 select * from activities where id=?
             ');
@@ -90,8 +87,26 @@
             $result = $query->fetch();
 
             return $result
-                ? self::deserialize($db, $result)
-                : null;
+                ? self::toActivity($db, $result)   // if result is present
+                : null;                             // if result not found
+        }
+
+        /**
+         * Shortcut to fetch all activities available in the database
+         * @param \PDO $db Target database, must have the "activities" table.
+         * @return array All activity objects
+         */
+        public static function getAll(\PDO $db): array {
+            $activities = [];
+            $query = $db->prepare('
+                select * from activities
+            ');
+            $query->execute();
+
+            while ($result = $query->fetch()) {
+                array_push($activities, self::toActivity($db, $result));
+            }
+            return $activities;
         }
 
         /**
@@ -99,7 +114,7 @@
          * PDO::execute.
          * @return array
          */
-        public function serialize(): array
+        public function toArray(): array
         {
             return [
                 'id' => $this->id,
@@ -114,7 +129,7 @@
          * @param mixed $result Fetch result
          * @return Activity
          */
-        public static function deserialize(\PDO $db, array|object $result): Activity
+        public static function toActivity(\PDO $db, array|object $result): Activity
         {
             if (gettype($result) == 'array') {
                 return new Activity(

@@ -9,12 +9,14 @@
     require_once 'library/external/Route.php';
     require_once 'library/Activity.php';
     require_once 'library/ResponseCode.php';
+    require_once 'library/Idempotency.php';
     require_once 'library/Util.php';
 
     // Use library
     use Steampixel\Route;
     use EverydayTasks\Activity;
     use EverydayTasks\Util;
+    use EverydayTasks\Idempotency;
 
     // activity API
     require_once 'api/Activity.php';
