@@ -14,8 +14,9 @@
     require_once 'Library/Activity.php';
     require_once 'Library/Category.php';
 
-    // Routing
-    require_once 'Library/External/Route.php';
+    // Routing and Templating
+require_once 'Library/External/Route.php';
+require_once 'Library/External/Template.php';
 
     // Use library
     use Steampixel\Route;
@@ -23,10 +24,10 @@
     use EverydayTasks\Util;
     use EverydayTasks\Idempotency;
 
-    // API's
+    // API
     require_once 'API/Activity.php';
     require_once 'API/Category.php';
 
-    // Run website
-    Route::run('/');
+    // GUI
+    require_once 'GUI/Activity.php';
 ?>

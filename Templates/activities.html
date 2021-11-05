@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>My Activities</title>
+    <meta name="viewport" content="width=device-width,height=device-height,initial-scale=1">
+  </head>
+  <body>
+    <header>
+      <h1><a href="#">EverydayTasks</a></h1>
+      <nav>
+        <ul>
+          <li><a href="#">Activities</a></li>
+          <li><a href="#">Tasks</a></li>
+          <li><a href="#">Projects</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <h2>Today's Activities (Friday, 5 November)</h2>
+    <a href="#">Add activity</a>
+
+    {% for ($i = 0; $i < 3; $i++): %}
+    <section>
+      <h3>16:00</h3>
+      <h4>Submit EverydayTasks Report</h4>
+      <p>Reviewed chapters 1 to 3 sample pages with corrections XXX</p>
+      <ul>
+        <li>View</li>
+        <li>Edit</li>
+        <li>Delete</li>
+      </ul>
+    </section>
+    {% endfor; %}
+
+  </body>
+</html>
