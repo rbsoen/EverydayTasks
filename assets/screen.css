@@ -1,0 +1,246 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&family=Ranga:wght@700&display=swap');
+
+/* null margins and padding to give good cross-browser baseline */
+html,body,address,blockquote,div,
+form,fieldset,caption,
+h1,h2,h3,h4,h5,h6,
+hr,ul,li,ol,ul,
+table,tr,td,th,p,img {
+    margin:0;
+    padding:0;
+}
+
+img, fieldset {
+    border:none;
+}
+
+table {
+    font-size:100%;
+    line-height:150%;
+}
+
+hr {
+    display:none;
+}
+
+html {
+    box-sizing: border-box;
+}
+
+*, *:before, *:after {
+    box-sizing: inherit;
+}
+
+/****************************************
+ variables
+ ****************************************/
+:root {
+    --side-padding: max(8em, 12%);
+    --main-bg: #ffede5;
+    --main-text: #222;
+
+    --top-bar-height: 4em;
+    --top-bar-bg: #CE9B9B;
+    --top-bar-text: #fff;
+    --top-bar-shadow: rgba(0,0,0,.3);
+    --button-menu-bg: #B66F6F;
+    --button-menu-text: #fff;
+
+    --menu-nav-width: 20em;
+
+    --button-bg: #fff;
+    --button-text: #222;
+
+    --white: #fff;
+    --blue: #58afe0;
+    --green: #72B63D;
+    --orange: #f69d4a;
+    --red: #e25252;
+
+    --card-bg: #fff;
+}
+/****************************************
+ begin theme
+ ****************************************/
+body {
+    font-family: "Poppins", sans-serif;
+    background: var(--main-bg);
+    color: var(--main-text);
+    line-height: 1.8em;
+}
+
+a {
+    color: inherit;
+    opacity: .8;
+}
+#top-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: var(--top-bar-height);
+    background: var(--top-bar-bg);
+    border-bottom: 1px solid rgba(0,0,0,.25);
+    display: flex;
+    flex-direction: row;
+    align-content: space-between;
+    align-items: center;
+    z-index: 99;
+    padding: 0 var(--side-padding);
+    color: var(--top-bar-text);
+}
+
+#top-bar > * {
+    display: block;
+}
+
+#main-menu {
+    list-style: none;
+    text-align: right;
+    width: var(--menu-nav-width);
+}
+
+#main-menu ul {
+    display: flex;
+}
+
+#main-menu li {
+    display: block;
+    flex-grow: 1;
+}
+
+/* page title */
+
+h1 {
+    font-size: 2em;
+    font-family: Ranga, sans-serif;
+    flex-grow: 1;
+    text-shadow: .1em .1em var(--top-bar-shadow);
+}
+
+h1 a {
+    text-decoration: none;
+}
+
+main {
+    margin-top: var(--top-bar-height);
+    padding: 2em var(--side-padding);
+}
+
+#todays-activities {
+    display: flex;
+    align-content: space-between;
+    align-items: center;
+    margin: .4em;
+}
+
+#todays-activities h2 {
+    flex-grow: 1;
+}
+/********************************
+ components
+ ********************************/
+
+.button {
+    --shadow-color: rgba(0,0,0,.4);
+    background: var(--button-bg);
+    color: var(--button-text);
+    display: inline-block;
+    padding: .2em 1em;
+    margin: .3em .2em;
+    text-decoration: none;
+    border-radius: 10px;
+    box-shadow: 0 .1em .1em var(--shadow-color);
+    border: 1px solid rgba(0,0,0,.1);
+    opacity: 1;
+    letter-spacing: .04em;
+    font-size: .9em;
+    transition: .4s box-shadow;
+}
+
+.button:hover {
+    box-shadow: 0 .3em .6em var(--shadow-color);
+}
+
+.button--menu {
+    --shadow-color: rgba(87, 29, 29, 0.6);
+    background: var(--button-menu-bg);
+    color: var(--button-menu-text);
+}
+
+.button--view {
+    --shadow-color: rgba(6, 89, 239, 0.6);
+    background: var(--blue);
+    color: var(--white);
+}
+
+.button--edit {
+    --shadow-color: rgba(255, 163, 43, 0.6);
+    background: var(--orange);
+    color: var(--white);
+}
+
+.button--delete {
+    --shadow-color: rgba(239, 6, 6, 0.6);
+    background: var(--red);
+    color: var(--white);
+}
+
+.button--add {
+    --shadow-color: rgba(27, 94, 0, 0.6);
+    background: var(--green);
+    color: var(--white);
+}
+
+.card {
+    display: flex;
+    flex-direction: row;
+}
+
+.card__time, .card__details {
+    background: var(--card-bg);
+    margin: .4em;
+    padding: .8em 1.2em;
+    border-radius: 10px;
+    box-shadow: 0 .3em .6em rgba(0,0,0,.3);
+}
+
+.card__details {
+    flex-grow: 1;
+}
+
+.card__time {
+    display: flex;
+    align-items: center;
+    min-width: 10em;
+}
+
+.card__time h3 {
+    width: 100%;
+    text-align: center;
+    font-size: 2.2em;
+    font-weight: 400;
+}
+
+.card__details {
+    display: flex;
+}
+
+.card__description {
+    flex-grow: 1;
+    padding-right: 1em;
+}
+
+.card__description h4 {
+    font-size: 1.2em;
+    line-height: 2.4em;
+}
+
+.card__actions {
+    list-style-type: none;
+    text-align: center;
+}
+
+.card__actions .button {
+    width: 100%;
+}
