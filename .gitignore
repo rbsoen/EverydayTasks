@@ -1,0 +1,6 @@
+.idea/
+.phpdoc/
+.cache/
+*.phar
+tmp
+cache

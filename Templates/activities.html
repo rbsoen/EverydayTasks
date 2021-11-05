@@ -6,9 +6,9 @@
     <meta name="viewport" content="width=device-width,height=device-height,initial-scale=1">
   </head>
   <body>
-    <header>
+    <header id="top-bar">
       <h1><a href="#">EverydayTasks</a></h1>
-      <nav>
+      <nav id="main-menu">
         <ul>
           <li><a href="#">Activities</a></li>
           <li><a href="#">Tasks</a></li>
@@ -21,15 +21,21 @@
     <a href="#">Add activity</a>
 
     {% for ($i = 0; $i < 3; $i++): %}
-    <section>
-      <h3>16:00</h3>
-      <h4>Submit EverydayTasks Report</h4>
-      <p>Reviewed chapters 1 to 3 sample pages with corrections XXX</p>
-      <ul>
-        <li>View</li>
-        <li>Edit</li>
-        <li>Delete</li>
-      </ul>
+    <section class="card">
+      <div class="card__time">
+        <h3>16:00</h3>
+      </div>
+      <div class="card__details">
+        <div class="card__description">
+          <h4>Submit EverydayTasks Report</h4>
+          <p>Reviewed chapters 1 to 3 sample pages with corrections XXX</p>
+        </div>
+        <ul class="card__actions">
+          <li><a href="#" class="button button--view">View</a></li>
+          <li><a href="#" class="button button--edit">Edit</a></li>
+          <li><a href="#" class="button button--delete">Delete</a></li>
+        </ul>
+      </div>
     </section>
     {% endfor; %}
 
