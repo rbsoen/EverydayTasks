@@ -234,6 +234,8 @@ main {
 .card__description h4 {
     font-size: 1.2em;
     line-height: 2.4em;
+    display: flex;
+    align-items: center;
 }
 
 .card__actions {
@@ -243,4 +245,22 @@ main {
 
 .card__actions .button {
     width: 100%;
+}
+
+.card__badge {
+    font-size: .6em;
+    text-transform: uppercase;
+    background-color: var(--badge-color, #333);
+    border-radius: 99em;
+    padding: .1em .8em;
+    margin-left: 1em;
+    height: 2em;
+    line-height: 2em;
+    color: #fff;
+    font-weight: 400;
+    letter-spacing: .1em;
+}
+
+.hidden {
+    font-size: 0;
 }

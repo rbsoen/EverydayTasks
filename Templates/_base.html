@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>{% yield title %}</title>
+        <meta name="viewport" content="width=device-width,height=device-height,initial-scale=1">
+        <link rel="stylesheet" href="/assets/screen.css" media="screen">
+    </head>
+    <body>
+    <header id="top-bar">
+        <h1><a href="#">EverydayTasks</a></h1>
+        <nav id="main-menu">
+            <ul>
+                <li><a href="#" class="button button--menu">Activities</a></li>
+                <li><a href="#" class="button button--menu">Tasks</a></li>
+                <li><a href="#" class="button button--menu">Projects</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        {% yield content %}
+    </main>
+
+    <script src="/assets/script.js"></script>
+    </body>
+</html>

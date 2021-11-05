@@ -117,6 +117,28 @@
         }
 
         /**
+         * Shortcut to fetch all activities available in the database matching an SQL criteria.
+         * (Potentially insecure)
+         * @param PDO $db Target database, must have the "activities" table.
+         * @param string $query SQL query to use (as a prepared statement)
+         * @param array $params Query parameters
+         * @return array All activity objects
+         */
+        public static function getCustom(PDO $db, string $query, array $params): array {
+            $activities = [];
+            $query = $db->prepare('
+                select * from activities where ' . $query . '
+            ');
+            $query->execute($params);
+
+            while ($result = $query->fetch()) {
+                array_push($activities, self::toActivity($db, $result));
+            }
+            return $activities;
+        }
+
+
+        /**
          * Transforms an Activity object into an array for use with
          * PDO::execute.
          * @return array

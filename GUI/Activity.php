@@ -14,7 +14,16 @@
     Route::clearRoutes();
 
     Route::add('/', function(){
+        $today = new DateTime();
+        $activities_today = Activity::getCustom(
+            Util::$db,
+            'date(date_time) = ?',
+            [$today->format('Y-m-d')]
+        );
+
         Template::view('Templates/activities.html', [
+            'activities' => $activities_today,
+            'today' => $today
         ]);
     }, 'get');
 
