@@ -159,4 +159,8 @@ class Route {
         }
     }
 
+    /* added by breil */
+    public static function clearRoutes() {
+        self::$routes = Array();
+    }
 }

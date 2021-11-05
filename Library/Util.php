@@ -77,5 +77,43 @@
             }
             return $formatted_headers;
         }
+
+        /**
+         * Return a representation of an object.
+         * @param string $self The object's URL
+         * @param array $object An array representation of the object
+         * @param string $id The object's ID
+         * @param string $object_name Object's class name
+         */
+        public static function convertIntoApiArray(string $self, array $object, string $id, string $object_name): array
+        {
+            http_response_code(ResponseCode::OK);
+            $output = [
+                'id' => $id,
+                'status' => $object_name
+            ];
+            $output = array_merge($output, $object);
+
+            // append links
+            return array_merge($output, [
+                'links' => [
+                    [
+                        'href' => $self,
+                        'rel' => 'self',
+                        'method' => 'GET'
+                    ],
+                    [
+                        'href' => $self,
+                        'rel' => 'edit',
+                        'method' => 'PUT'
+                    ],
+                    [
+                        'href' => $self,
+                        'rel' => 'delete',
+                        'method' => 'DELETE'
+                    ]
+                ]
+            ]);
+        }
     }
 ?>

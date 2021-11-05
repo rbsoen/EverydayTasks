@@ -1,5 +1,5 @@
 <?php
-    require_once 'library/Util.php';
+    require_once 'Library/Util.php';
 
     use EverydayTasks\Util;
 

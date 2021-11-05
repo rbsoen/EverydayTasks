@@ -4,6 +4,7 @@
 
     use DateTime;
     use DateTimeZone;
+    use EverydayTasks\Util;
 
     class Idempotency {
         private const IDEMPOTENCY_FILE = "tmp/idempotency.json";
@@ -14,7 +15,7 @@
          * Handle idempotency and expire old idempotency keys
          * @throws \Exception
          */
-        private static function init()
+        private static function init(): void
         {
             // load array
             if (
@@ -43,13 +44,6 @@
             file_put_contents(self::IDEMPOTENCY_FILE, json_encode(self::$keys));
         }
 
-        // Check idempotency tokens
-        public static function check()
-        {
-            self::init();
-            print_r(self::$keys);
-        }
-
         // Create idempotency token, default to 1 hour
         public static function useKey(string $key, int $ttl = 60*60): bool
         {
@@ -62,5 +56,22 @@
                 return true;
             }
             return false;
+        }
+        
+        public static function useKeyFromHttp(int $ttl = 60*60): bool
+        {
+            $headers = Util::getHttpHeaders();
+            
+            // Detect optional idempotency token
+            $idempotency =
+                key_exists('Idempotency-Token', $headers)
+                    ? $headers['Idempotency-Token']         // key specified
+                    : '';                                   // key unspecified
+            
+            if (!empty($idempotency)) {
+                return self::useKey($idempotency, $ttl);
+            }
+            
+            return true;
         }
     }

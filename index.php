@@ -3,14 +3,19 @@
     ini_set('display_errors', 1);
     error_reporting(E_ALL);
 
+    // configuration
     require_once 'config.php';
 
-    // Needed libraries
-    require_once 'library/external/Route.php';
-    require_once 'library/Activity.php';
-    require_once 'library/ResponseCode.php';
-    require_once 'library/Idempotency.php';
-    require_once 'library/Util.php';
+    require_once 'Library/Util.php'; // various helper functions
+    require_once 'Library/ResponseCode.php'; // response code constants
+    require_once 'Library/Idempotency.php'; // idempotency feature
+
+    // components
+    require_once 'Library/Activity.php';
+    require_once 'Library/Category.php';
+
+    // Routing
+    require_once 'Library/External/Route.php';
 
     // Use library
     use Steampixel\Route;
@@ -18,8 +23,9 @@
     use EverydayTasks\Util;
     use EverydayTasks\Idempotency;
 
-    // activity API
-    require_once 'api/Activity.php';
+    // API's
+    require_once 'API/Activity.php';
+    require_once 'API/Category.php';
 
     // Run website
     Route::run('/');
