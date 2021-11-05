@@ -17,7 +17,7 @@
         $today = new DateTime();
         $activities_today = Activity::getCustom(
             Util::$db,
-            'date(date_time) = ?',
+            'date(date_time) = ? order by date_time desc',
             [$today->format('Y-m-d')]
         );
 
