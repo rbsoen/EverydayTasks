@@ -279,3 +279,62 @@ main {
 .hidden {
     font-size: 0;
 }
+
+form {
+    background: var(--card-bg);
+    margin: .4em;
+    padding: .8em 1.2em;
+    border-radius: 10px;
+    box-shadow: 0 .3em .6em rgba(0,0,0,.3);
+    overflow: auto;
+}
+
+form fieldset {
+    display: flex;
+    flex-direction: column;
+}
+
+form input[type=text], form textarea {
+    border: 1px solid #ddd;
+    font-size: 1em;
+    font-family: Poppins, sans-serif;
+    padding: 5px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px inset #ccc;
+}
+
+form textarea {
+    width: 100% !important;
+}
+
+form fieldset > legend {
+    font-size: 1.25em;
+    font-weight: bold;
+    padding: .5em 0;
+}
+
+.hidden-and-submit {
+    display: flex;
+    flex-direction: row-reverse;
+    margin-top: 1.5em;
+}
+
+form input[type=submit] {
+    font-family: Poppins, sans-serif;
+    cursor: pointer;
+    display: block;
+    padding: .5em 1em;
+}
+
+form select {
+    border: 1px solid rgba(0,0,0,.2);
+    box-shadow: 0 2px 10px #ccc;
+    padding: .5em;
+    font-size: 1em;
+    font-family: Poppins, sans-serif;
+    border-radius: 5px;
+}
+
+form input:focus, form textarea:focus, form select:focus {
+    box-shadow: 0 0 0 3px var(--orange);
+}

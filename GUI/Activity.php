@@ -51,6 +51,21 @@
 
     });
 
+    /*
+     * Edit one activity
+     */
+    Route::add('/([0-9a-f]{8})/edit', function($id){
+        $activity = Activity::searchById(Util::$db, $id);
+
+
+
+        Template::view('Templates/activities_edit.html', [
+            'page_title' => 'Activity edit',
+            'page_heading' => 'Edit Activity',
+            'activity' => $activity
+        ]);
+    }, ['get', 'post']);
+
 
     // Execute GUI route
     Route::run('/activity');

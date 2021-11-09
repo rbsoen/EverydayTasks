@@ -1,0 +1,40 @@
+{% extends Templates/_base.html %}
+
+{% block title %}
+{{{ $page_title }}}
+{% endblock %}
+
+{% block content %}
+<header class="activity-heading">
+    <h2>{{{ $page_heading }}}</h2>
+</header>
+
+{% if (!empty($activity)): %}
+<form method="post">
+    <fieldset>
+        <legend>Activity Details</legend>
+        <label for="subject">Subject</label>
+        <input type="text" id="subject" name="subject" value="{{{ $activity->getSubject() }}}">
+        <br>
+        <label for="description">Description</label>
+        <textarea id="description" name="description" rows="3">Dolor sit amet</textarea>
+        <br>
+        <label for="category">Category</label>
+        <select name="category" id="category">
+            <option value="a">AAAA</option>
+            <option value="b">B</option>
+            <option value="c">CCC</option>
+            <option value="d">DD</option>
+            <option value="e">EEE</option>
+        </select>
+    </fieldset>
+    <fieldset class="hidden-and-submit">
+        <input type="hidden" name="anticsrf" value="MyACSRFValue">
+        <input type="submit" class="button button--edit">
+    </fieldset>
+</form>
+{% else: %}
+<p>Invalid activity ID.</p>
+{% endif; %}
+
+{% endblock %}
