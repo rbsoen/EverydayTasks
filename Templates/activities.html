@@ -5,9 +5,14 @@
 {% endblock %}
 
 {% block content %}
-<header id="todays-activities">
-  <h2>Today's Activities ({{{ $today->format("l, j F Y") }}})</h2>
-  <a href="add" class="button button--add">Add</a>
+<header class="activity-heading">
+  {% if ($is_view_today): %}
+    <h2>Today's Activities ({{{ $today->format("l, j F Y") }}})</h2>
+    <a href="add" class="button button--add">Add</a>
+  {% else: %}
+    <h2>All Activities</h2>
+    <a href="add" class="button button--add">Add</a>
+  {% endif; %}
 </header>
 
 {% foreach ($activities as $activity): %}
@@ -28,7 +33,7 @@
         <p>{{{ $activity->getDescription() }}}</p>
       </div>
       <ul class="card__actions">
-        <li><a href="{{{ $activity->getID() }}}" class="button button--view">View</a></li>
+<!--        <li><a href="{{{ $activity->getID() }}}" class="button button&#45;&#45;view">View</a></li>-->
         <li><a href="{{{ $activity->getID() }}}/edit" class="button button--edit">Edit</a></li>
         <li><a href="{{{ $activity->getID() }}}/delete" class="button button--delete">Delete</a></li>
       </ul>
@@ -36,5 +41,7 @@
   </section>
   {% endforeach; %}
 
-  <a href="#">View all activities</a>
+  {% if ($is_view_today): %}
+  <a href="all" id="view-all-activities">View all activities</a>
+  {% endif; %}
 {% endblock %}

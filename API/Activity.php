@@ -3,14 +3,14 @@
     namespace EverydayTasks\API\Activity;
 
     use DateTime;
-use EverydayTasks\Category;
-use EverydayTasks\Util;
+    use EverydayTasks\Category;
+    use EverydayTasks\Util;
     use EverydayTasks\Activity;
     use EverydayTasks\ResponseCode;
     use EverydayTasks\Idempotency;
     use Steampixel\Route;
 
-Route::clearRoutes();
+    Route::clearRoutes();
 
     /**
      * Return a representation of a generated activity.
@@ -259,5 +259,5 @@ Route::clearRoutes();
     }, 'post');
 
     // Execute API routes
-     Route::run('/api/activity');
+    Route::run('/api/activity');
 ?>

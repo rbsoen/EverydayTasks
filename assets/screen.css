@@ -128,14 +128,14 @@ main {
     padding: 2em var(--side-padding);
 }
 
-#todays-activities {
+.activity-heading {
     display: flex;
     align-content: space-between;
     align-items: center;
     margin: .4em;
 }
 
-#todays-activities h2 {
+.activity-heading h2 {
     flex-grow: 1;
 }
 /********************************
@@ -196,8 +196,22 @@ main {
 .card {
     display: flex;
     flex-direction: row;
+    transition: .3s transform;
+    transform: perspective(800px) translateZ(0);
 }
 
+.card:hover {
+    transform: perspective(800px) translateZ(3em);
+}
+
+.card--start-animation {
+    animation: card-in .5s;
+}
+
+@keyframes card-in {
+    from {transform: perspective(800px) rotateX(23deg) translateZ(5em); opacity: 0;}
+    to {transform: perspective(800px) rotateX(0deg); opacity: 1;}
+}
 .card__time, .card__details {
     background: var(--card-bg);
     margin: .4em;
