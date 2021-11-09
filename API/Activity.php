@@ -8,7 +8,8 @@
     use EverydayTasks\Activity;
     use EverydayTasks\ResponseCode;
     use EverydayTasks\Idempotency;
-    use Steampixel\Route;
+use phpDocumentor\Reflection\Types\Iterable_;
+use Steampixel\Route;
 
     Route::clearRoutes();
 
@@ -103,11 +104,37 @@
         return returnActivityJson($activity);
     }
 
-    // Read all activities
+    /*
+     * Read all activities
+     *
+     * GET arguments:
+     * for: Gets activities for a certain date. Possible values:
+     *          - today: Activities from the current day.
+     */
     Route::add('/', function()
     {
         $activities = [];
-        foreach (Activity::getAll(Util::$db) as $activity) {
+
+        $activity_query = Activity::getAll(Util::$db);
+
+        $get = Util::getParams();
+
+        if (array_key_exists('for', $get)) {
+            switch ($get['for']) {
+                case 'today':
+                    $today = new DateTime();
+                    $activity_query = Activity::getCustom(
+                        Util::$db,
+                        'date(date_time) = ? order by date_time desc',
+                        [$today->format('Y-m-d')]
+                    );
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        foreach ($activity_query as $activity) {
             array_push($activities, convertActivityIntoApiArray($activity));
         }
 
