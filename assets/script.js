@@ -13,19 +13,6 @@ String.prototype.capitalize = function(){
     );
 };
 
-/**
- * Creates an HTML element, initialized with a class name
- * @param tag HTML tag to use
- * @param classname Initialize with a class name
- * @return Node
- */
-Document.prototype.createElementWithClassName = function(tag, classname){
-    return Object.assign(
-        document.createElement(tag),
-        {className: classname}
-    )
-};
-
 (function(d, w, $){
     /**
      * Create an activity card with subject, description and actions
@@ -38,16 +25,64 @@ Document.prototype.createElementWithClassName = function(tag, classname){
             "section", {
                 className: "card card--start-animation",
                 contents: [
-                    {tag: "div", className: "card__time", contents:{tag:"h3", textContent:"15:30"}}
+                    {tag: "div", className: "card__time", contents:{
+                        tag:"h3",
+                            textContent: new
+                                Date(activity.date_time)
+                                .toLocaleTimeString('jpn')
+                                .split(':')
+                                .slice(0,2)
+                                .join(':')
+                        }
+                    }
                 ]
             });
 
         // create card__description
+        var new_card_title = $.create(
+            "h4", {
+                textContent: activity.subject
+            }
+        );
+
+        // add category if available
+        if (activity.links.category instanceof Object){
+            // create category display
+            new_card_title.appendChild($.create(
+                "span", {
+                    className: "hidden",
+                    textContent: ", categorized in"
+                }
+            ));
+
+            // get category data
+            let req = new XMLHttpRequest();
+            req.addEventListener("load", function(){
+               try {
+                   var category = JSON.parse(this.responseText);
+               } catch (e) {
+                   return
+               }
+               new_card_title.appendChild(
+                   $.create(
+                       "span", {
+                           className: "card__badge",
+                           textContent: category.title,
+                           style: {"--badge-color": "#" + category.color.toString(16)}
+                       }
+                   )
+               )
+            });
+            req.open('get', activity.links.category.href);
+            req.send();
+        }
+
+        // make description
         let new_card_description = $.create(
             "div", {
                 className:"card__description",
                 contents: [
-                    {tag:"h4", textContent: activity.subject},
+                    new_card_title,
                     {tag:"p", textContent: activity.description}
                 ]
             }
@@ -122,12 +157,19 @@ Document.prototype.createElementWithClassName = function(tag, classname){
     })
 
     // Main page controls
-    if (d.getElementById("view-all-activities") instanceof Node) {
-        d.getElementById("view-all-activities").addEventListener("click", function(e){
+    let view_all_activities = d.getElementById("view-all-activities");
+    Object.getPrototypeOf(view_all_activities).click_counter = 0; // detect multiple clicks
+    if (view_all_activities instanceof Node) {
+        view_all_activities.addEventListener("click", function(e){
             e.preventDefault();
+
+            // prevent re-calling when link is clicked multiple times
+            if (this.click_counter > 0) return;
+            this.click_counter++;
 
             let req = new XMLHttpRequest();
             this.textContent = "Please wait";
+            this.href = '#';
 
             req.addEventListener("load", handleActivityRequest);
             req.addEventListener("load", function(e){
@@ -138,11 +180,14 @@ Document.prototype.createElementWithClassName = function(tag, classname){
                 }
 
                 // remove links
-                if (d.getElementById("view-all-activities")) {
-                    d.getElementById("view-all-activities").remove();
-                }
+                view_all_activities.remove();
 
-                // add link
+                // change heading
+                d.getElementsByClassName('activity-heading')[0]
+                    .getElementsByTagName('h2')[0]
+                    .textContent = "All Activities";
+
+                // change URL
                 history.pushState({}, "", "/activity/all");
             });
             req.open("get", "/api/activity/");
