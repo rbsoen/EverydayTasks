@@ -13,6 +13,21 @@ String.prototype.capitalize = function(){
     );
 };
 
+Date.prototype.formatDate = function() {
+    let day_names = [
+        "Sunday", "Monday", "Tuesday", "Wednesday",
+        "Thursday", "Friday", "Saturday"
+    ];
+
+    let month_names = [
+        "January", "February", "March", "April",
+        "May", "June", "July", "August", "September",
+        "October", "November", "December"
+    ];
+
+    return `${day_names[this.getDay()]}, ${this.getDate()} ${month_names[this.getMonth()]} ${this.getFullYear()}`;
+};
+
 (function(d, w, $){
     /**
      * Create an activity card with subject, description and actions
@@ -126,73 +141,151 @@ String.prototype.capitalize = function(){
 
     /**
      * Create cards from Activity response, one-by-one
-     * @param this XMLHttpRequest
+     * @param activities Activity object
      */
-    function handleActivityRequest(e) {
-        try {
-            var activities = JSON.parse(this.responseText);
-        } catch (x) {
-            throw new Error("Can't load JSON file");
-        }
-
+    function fadeActivitiesIn(activities, showAllActivitiesLink) {
         let x = 0;
         for (const activity of activities) {
             x += 1;
             setTimeout(function (a){
-                let scriptNode = d.body.getElementsByTagName("main")[0].lastElementChild;
-                scriptNode.append(
+                let scriptNode = $("main");
+                scriptNode.appendChild(
                     makeActivityCard(a)
                 );
+
+                if (activity == activities[activities.length-1]) {
+                    if (showAllActivitiesLink) {
+                        $('main').appendChild(
+                            $.create("a", {
+                                id: "view-all-activities",
+                                textContent: "View all activities",
+                                href: "all"
+                            })
+                        );
+                    }
+                }
             }, 100*x, activity);
         }
 
     }
 
-    // Page handler
-    w.addEventListener("popstate", function(e) {
-        console.log(location.pathname);
-
-        // page handler
-
-    })
-
-    // Main page controls
-    let view_all_activities = d.getElementById("view-all-activities");
-    Object.getPrototypeOf(view_all_activities).click_counter = 0; // detect multiple clicks
-    if (view_all_activities instanceof Node) {
-        view_all_activities.addEventListener("click", function(e){
+    function addAllActivitiesHandler(all_activities_link) {
+        Object.getPrototypeOf(all_activities_link).click_counter = 0
+        all_activities_link.addEventListener("click", function(e){
             e.preventDefault();
-
             // prevent re-calling when link is clicked multiple times
             if (this.click_counter > 0) return;
             this.click_counter++;
-
-            let req = new XMLHttpRequest();
-            this.textContent = "Please wait";
-            this.href = '#';
-
-            req.addEventListener("load", handleActivityRequest);
-            req.addEventListener("load", function(e){
-                try {
-                    JSON.parse(this.responseText);
-                } catch (x) {
-                    return;
-                }
-
-                // remove links
-                view_all_activities.remove();
-
-                // change heading
-                d.getElementsByClassName('activity-heading')[0]
-                    .getElementsByTagName('h2')[0]
-                    .textContent = "All Activities";
-
-                // change URL
-                history.pushState({}, "", "/activity/all");
-            });
-            req.open("get", "/api/activity/");
-            req.send();
+            loadPage("/activity/all");
+            history.pushState({}, '', "/activity/all");
         })
+    }
+
+    function loadPage(page_name) {
+        let activities, req;
+        switch (page_name) {
+            case "/activity/":
+                //$(".activity-heading h2").textContent = "Today's Activities";
+                req = new XMLHttpRequest();
+                req.addEventListener("loadend", function(e){
+                    // load activities
+                    try { activities = JSON.parse(this.responseText) } catch (e) { return; }
+
+                    // delete everything in main
+                    while (true) {
+                        try { $('main').firstElementChild.remove() }
+                        catch (e){ break; }
+                    }
+
+                    // load content for the "all activities" page
+
+                    let date = new Date();
+
+                    // header
+                    $('main').appendChild(
+                        $.create(
+                            "header", {
+                                className: "activity-heading",
+                                contents: [
+                                    {tag: "h2", textContent: `Today's Activities (${date.formatDate()})`},
+                                    {tag: "a", textContent: "Add", href: "add", className: "button button--add"}
+                                ]
+                            }
+                        )
+                    );
+
+                    // show all activities link
+                    let all_activities_link =
+                        $.create("a", {
+                            id: "view-all-activities",
+                            textContent: "View all activities",
+                            href: "all"
+                        });
+                    addAllActivitiesHandler(all_activities_link);
+                    $('main').appendChild(all_activities_link);
+
+                    // activities
+                    fadeActivitiesIn(activities);
+                })
+
+                // fire the request
+                req.open("get", "/api/activity/?for=today");
+                req.send();
+
+                break;
+
+            case "/activity/all":
+                // ensure loading activities first
+                req = new XMLHttpRequest();
+                req.addEventListener("loadend", function(e){
+                    // load activities
+                    try { activities = JSON.parse(this.responseText) } catch (e) { return; }
+
+                    // delete everything in main
+                    while (true) {
+                        try { $('main').firstElementChild.remove() }
+                        catch (e){ break; }
+                    }
+
+                    // load content for the "all activities" page
+
+                    // header
+                    $('main').appendChild(
+                        $.create(
+                            "header", {
+                                className: "activity-heading",
+                                contents: [
+                                    {tag: "h2", textContent: "All Activities"},
+                                    {tag: "a", textContent: "Add", href: "add", className: "button button--add"}
+                                ]
+                            }
+                        )
+                    );
+
+                    // activities
+                    fadeActivitiesIn(activities);
+                })
+
+                // fire the request
+                req.open("get", "/api/activity/");
+                req.send();
+
+                break;
+            default:
+                break;
+        }
+    }
+
+    // Page handler
+    w.addEventListener("popstate", function(e) {
+        loadPage(location.pathname);
+    })
+
+
+    // Main page controls
+    let view_all_activities = d.getElementById("view-all-activities");
+    if (view_all_activities instanceof Node) {
+        addAllActivitiesHandler(view_all_activities);
     }
 
 })(document, window, Bliss);
