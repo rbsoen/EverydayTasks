@@ -97,22 +97,22 @@
             // append links
             return array_merge($output, [
                 'links' => [
-                    [
+                    'self' => [
                         'href' => $self,
                         'rel' => 'self',
                         'method' => 'GET'
                     ],
-                    [
+                    'edit' => [
                         'href' => $self,
                         'rel' => 'edit',
                         'method' => 'PUT'
                     ],
-                    [
+                    'delete' => [
                         'href' => $self,
                         'rel' => 'delete',
                         'method' => 'DELETE'
                     ]
-                ]
+                ],
             ]);
         }
     }

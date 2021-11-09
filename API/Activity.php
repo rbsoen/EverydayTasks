@@ -28,13 +28,10 @@
         // modify the array to make the category a link instead
         // add link
         if (!empty($activity_array['category'])) {
-            array_push(
-                $activity_array['links'],
-                [
-                    'href' => '/api/category/' . $activity->getCategory()->getID(),
-                    'rel' => 'category'
-                ]
-            );
+            $activity_array['links']['category'] = [
+                'href' => '/api/category/' . $activity->getCategory()->getID(),
+                'method' => 'GET'
+            ];
         }
         // remove original key
         unset($activity_array['category']);
