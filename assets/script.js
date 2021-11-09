@@ -26,40 +26,31 @@ Document.prototype.createElementWithClassName = function(tag, classname){
     )
 };
 
-(function(d, w){
+(function(d, w, $){
     /**
      * Create an activity card with subject, description and actions
      * @param activity
      * @return {Node}
      */
     const makeActivityCard = (activity) => {
-        // <section class="card">
-        let new_card = d.createElementWithClassName("section", "card card--start-animation");
-
-        // <div class="card__time">
-        let new_card_time = d.createElementWithClassName("div", "card__time");
-
-        // <h3>15:30</h3> into card__time
-        new_card_time.appendChild(
-            d.createElement("h3").appendChild(
-                d.createTextNode("15:30")
-            ).parentElement
-        );
+        // initialize card with time
+        let new_card = $.create(
+            "section", {
+                className: "card card--start-animation",
+                contents: [
+                    {tag: "div", className: "card__time", contents:{tag:"h3", textContent:"15:30"}}
+                ]
+            });
 
         // create card__description
-        let new_card_description = d.createElementWithClassName("div", "card__description");
-
-        new_card_description.appendChild(
-        // <h4>Subject</h4> into card__description
-            d.createElement("h4").appendChild(
-                d.createTextNode(activity.subject)
-            ).parentElement
-        // -append again-
-        ).parentElement.appendChild(
-        // <p>Description</p> into card__description
-            d.createElement("p").appendChild(
-                d.createTextNode(activity.description)
-            ).parentElement
+        let new_card_description = $.create(
+            "div", {
+                className:"card__description",
+                contents: [
+                    {tag:"h4", textContent: activity.subject},
+                    {tag:"p", textContent: activity.description}
+                ]
+            }
         );
 
         // define actions
@@ -68,39 +59,33 @@ Document.prototype.createElementWithClassName = function(tag, classname){
             delete: `${activity.id}/delete`
         };
 
-        // <ul class="card__actions">
-        let new_card_actions = d.createElementWithClassName("ul", "card__actions");
+        // create action list
+        let new_card_actions = $.create("ul", {class:"card__actions"});
         for (const key in card_links) {
-            let new_link = d.createElementWithClassName("a", `button button--${key}`);
-            new_link.href = card_links[key];
-
-            // <li><a href="#">Link</a></li>
             new_card_actions.appendChild(
-                d.createElement("li").appendChild(
-                    new_link.appendChild(
-                        d.createTextNode(key.capitalize())
-                    ).parentElement
-                ).parentElement
+                $.create(
+                    "li", {
+                        contents: {
+                            tag: "a",
+                            href: card_links[key],
+                            textContent: key.capitalize(),
+                            className: `button button--${key}`
+                        }
+                    }
+                )
             );
-
         }
 
         // details = description + actions
-        let new_card_details = d.createElementWithClassName("div", "card__details");
-        new_card_details.className = "card__details";
-        new_card_details.appendChild(
-            new_card_description
-        ).parentElement.appendChild(
-            new_card_actions
+        let new_card_details = $.create(
+            "div", {
+                class:"card__details",
+                contents: [new_card_description, new_card_actions]
+            }
         );
 
         // card = time + details
-        new_card.appendChild(
-            new_card_time
-        ).parentElement.appendChild(
-            new_card_details
-        );
-
+        new_card.appendChild(new_card_details);
         return new_card;
     };
 
@@ -165,4 +150,4 @@ Document.prototype.createElementWithClassName = function(tag, classname){
         })
     }
 
-})(document, window);
+})(document, window, Bliss);
