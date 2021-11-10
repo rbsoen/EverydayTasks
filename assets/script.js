@@ -287,6 +287,7 @@ Date.prototype.formatShortDate = function() {
      * Add a loading screen to the page
      */
     function addLoadingScreen() {
+        removeLoadingScreen();
         $("main").appendChild(
             $.create("div", {
                 className: "loading"
@@ -297,7 +298,10 @@ Date.prototype.formatShortDate = function() {
     /**
      * Remove the loading screen
      */
-    function removeLoadingScreen() { $(".loading").remove(); }
+    function removeLoadingScreen() {
+        try { $(".loading").remove(); }
+        catch (e) { }
+    }
 
     /**
      * Clear all notifications
@@ -754,7 +758,6 @@ Date.prototype.formatShortDate = function() {
                 break;
 
             case "/activity/":
-                clearWholePage();
                 addLoadingScreen();
                 addRequest(
                     "/api/activity/?for=today",
@@ -812,7 +815,6 @@ Date.prototype.formatShortDate = function() {
                 break;
 
             case "/activity/all":
-                clearWholePage();
                 addLoadingScreen();
                 addRequest(
                     "/api/activity/",
