@@ -49,6 +49,8 @@ Date.prototype.formatShortDate = function() {
 };
 
 (function(d, w, $) {
+    /* ----- begin utility vars and functions ----- */
+
     // set "global" (within this scope) variables
     let timeOuts = [];
     let ajax_requests = [];
@@ -76,6 +78,27 @@ Date.prototype.formatShortDate = function() {
         ajax_requests.push(ajax);
         ajax.then(then_func).catch(catch_func);
     }
+
+    /**
+     * Abort all pending AJAX requests
+     */
+    function abortAllRequests(){
+        for (ajax of ajax_requests) {
+            ajax.xhr.abort()
+        }
+    }
+
+    /**
+     * Abort all pending timed actions
+     */
+    function abortAllTimeouts(){
+        var timeout;
+        while (timeout = timeOuts.pop()) {
+            clearTimeout(timeout);
+        }
+    }
+
+    /* ----- site-specific vars and functions ----- */
 
     /**
      * Create an activity card with subject, description and actions
@@ -193,7 +216,7 @@ Date.prototype.formatShortDate = function() {
             // associate links with their actions
             new_action.firstElementChild.addEventListener("click", function(e) {
                 e.preventDefault();
-                loadPage(this.href, true);
+                doRoute(this.href, true);
             });
 
             // add buttons
@@ -511,7 +534,7 @@ Date.prototype.formatShortDate = function() {
                         });
                     }
                     // refresh all activities
-                    loadPage(last_page, true);
+                    doRoute(last_page, true);
                     closeForm();
                 },
                 function(e) {
@@ -627,7 +650,7 @@ Date.prototype.formatShortDate = function() {
                         message: "Activity deleted successfully!"
                     });
                     // refresh all activities
-                    loadPage(last_page, true);
+                    doRoute(last_page, true);
                     closeForm();
                 },
                 function(e) {
@@ -655,32 +678,12 @@ Date.prototype.formatShortDate = function() {
         return delete_form_container;
     }
 
-
-    /**
-     * Abort all pending AJAX requests
-     */
-    function abortAllRequests(){
-        for (ajax of ajax_requests) {
-            ajax.xhr.abort()
-        }
-    }
-
-    /**
-     * Abort all pending animation actions
-     */
-    function abortAllTimeouts(){
-        var timeout;
-        while (timeout = timeOuts.pop()) {
-            clearTimeout(timeout);
-        }
-    }
-
     /**
      * Loads a page depending on the URL.
      * @param page_name
      * @param push_to_history Bool
      */
-    function loadPage(page_name, push_to_history) {
+    function doRoute(page_name, push_to_history) {
         // only keep track of last page if it is different
         if (last_page != location.pathname)
             last_page = location.pathname;
@@ -865,7 +868,7 @@ Date.prototype.formatShortDate = function() {
     // Page handler
     w.addEventListener("popstate", function(e) {
         console.log("Loading: " + location.pathname);
-        loadPage(location.pathname, false);
+        doRoute(location.pathname, false);
     })
 
     /**
@@ -882,7 +885,7 @@ Date.prototype.formatShortDate = function() {
                 // prevent re-calling when link is clicked multiple times
                 if (this.click_counter > 0) return;
                 this.click_counter++;
-                loadPage("/activity/all", true);
+                doRoute("/activity/all", true);
             })
         }
     };
@@ -901,7 +904,7 @@ Date.prototype.formatShortDate = function() {
                 e.preventDefault();
 
                 // remove base URL from the menu link
-                loadPage(
+                doRoute(
                     current_link.href.replace(
                         /https?:\/\/[a-z\-_]+\.[a-z]+\//,
                         '/'
@@ -914,7 +917,7 @@ Date.prototype.formatShortDate = function() {
         if (add_activity_button instanceof Node) {
             add_activity_button.addEventListener("click", function(e) {
                 e.preventDefault();
-                loadPage("/activity/add", true);
+                doRoute("/activity/add", true);
             })
         }
 
@@ -927,7 +930,7 @@ Date.prototype.formatShortDate = function() {
             let edit_button = edit_buttons[i]
             edit_button.addEventListener("click", function(e) {
                 e.preventDefault();
-                loadPage(edit_button.href, true);
+                doRoute(edit_button.href, true);
             });
         }
 
@@ -940,7 +943,7 @@ Date.prototype.formatShortDate = function() {
             let delete_button = delete_buttons[i]
             delete_button.addEventListener("click", function(e) {
                 e.preventDefault();
-                loadPage(delete_button.href, true);
+                doRoute(delete_button.href, true);
             });
         }
     };
