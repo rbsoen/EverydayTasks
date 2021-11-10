@@ -58,6 +58,7 @@ html {
     --red: #e25252;
 
     --card-bg: #fff;
+    --animation-length: .3s;
 }
 /****************************************
  begin theme
@@ -208,7 +209,7 @@ main {
 }
 
 .card--start-animation {
-    animation: card-in .5s;
+    animation: var(--animation-length) card-in;
 }
 
 @keyframes card-in {
@@ -353,11 +354,11 @@ form input:focus, form textarea:focus, form select:focus {
 	height: 100%;
 	z-index: 999;
 	background: rgba(0,0,0,.7);
-	animation: .5s form-fade-in alternate;
+	animation: var(--animation-length) form-fade-in alternate;
 }
 
 .fullsize-form-container-out {
-	animation: .5s form-fade-out;
+	animation: var(--animation-length) form-fade-out;
 }
 
 .fullsize-form-container > form {
@@ -369,7 +370,7 @@ form input:focus, form textarea:focus, form select:focus {
 }
 
 .form-begin-animation {
-	animation: .5s form-fly-in;
+	animation: var(--animation-length) form-fly-in;
 }
 
 @keyframes form-fade-in {
@@ -396,13 +397,13 @@ form input:focus, form textarea:focus, form select:focus {
 	padding: .5em;
 	text-align: center;
 	box-shadow: 0 -3px 25px rgba(0,0,0,.4);
-	animation: .5s notification-start;
+	animation: var(--animation-length) notification-start;
 	font-weight:bold;
     z-index: 9999;
 }
 
 .notification--animation-end {
-	animation: .5s notification-end;
+	animation: var(--animation-length) notification-end;
 }
 
 .notification--success {
