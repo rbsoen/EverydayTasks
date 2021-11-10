@@ -158,6 +158,8 @@ main {
     letter-spacing: .04em;
     font-size: .9em;
     transition: .4s box-shadow;
+    font-family: inherit;
+    cursor: pointer;
 }
 
 .button:hover {
@@ -326,8 +328,6 @@ form fieldset > legend {
 }
 
 form input[type=submit] {
-    font-family: Poppins, sans-serif;
-    cursor: pointer;
     display: block;
     padding: .5em 1em;
 }
