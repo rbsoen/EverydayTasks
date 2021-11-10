@@ -48,6 +48,30 @@ Date.prototype.formatShortDate = function() {
     return `${this.getDate()} ${month_names[this.getMonth()]}`;
 };
 
+/**
+ * Gets a standard time string
+ * @example new Date().getTimeString() == "15:28"
+ * @return string Formatted time
+ */
+Date.prototype.getTimeString = function() {
+    var hours = this.getHours();
+    var minutes = this.getMinutes();
+
+    // add a zero to the hour as needed
+    hours =
+        hours > 9
+        ? hours
+        : "0" + hours;
+
+    // add a zero to the minute as needed
+    minutes =
+        minutes > 9
+        ? minutes
+        : "0" + minutes;
+
+    return `${hours}:${minutes}`
+};
+
 (function(d, w, $) {
     /* ----- begin utility vars and functions ----- */
 
@@ -123,10 +147,7 @@ Date.prototype.formatShortDate = function() {
                             {tag: "br"},
                             {tag: "span",
                                 textContent: new Date(activity.date_time)
-                                    .toLocaleTimeString('jpn')
-                                    .split(':')
-                                    .slice(0, 2)
-                                    .join(':')
+                                    .getTimeString()
                             }
                         ]
                     }
@@ -861,7 +882,7 @@ Date.prototype.formatShortDate = function() {
                 break;
             default:
                 // go to the static page if there is no dynamic equivalent
-                // TODO: going back by browser method is not possible
+                // TODO: going back by browser method is not possible in Chrome
                 w.location.href = page_name;
                 break;
         }

@@ -35,7 +35,7 @@ html {
  variables
  ****************************************/
 :root {
-    --side-padding: max(8em, 12%);
+    --side-padding: 12%;
     --main-bg: #ffede5;
     --main-text: #222;
 
