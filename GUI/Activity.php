@@ -36,7 +36,11 @@
      */
     Route::add('/all', function(){
         $today = new DateTime();
-        $activities = Activity::getAll(Util::$db);
+        $activities = Activity::getCustom(
+            Util::$db,
+            '1=1 order by date_time desc',
+            []
+        );
 
         Template::view('Templates/activities.html', [
             'activities' => $activities,

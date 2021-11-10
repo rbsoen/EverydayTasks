@@ -23,7 +23,7 @@
   <section class="card">
     <div class="card__time">
       <h3>
-          <span>{{{ $activity->date_time->format("d M") }}}</span>
+          <span>{{{ ltrim($activity->date_time->format("d M"), "0") }}}</span>
           <br>
           <span>{{{ $activity->date_time->format("H:i") }}}</span>
       </h3>
