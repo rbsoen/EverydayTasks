@@ -1,15 +1,16 @@
-;"use strict";
+;
+"use strict";
 
 /**
  * Force capitalize a string
  * @example "helloWorld".capitalize() == "Helloworld"
  * @return string Capitalized word
  */
-String.prototype.capitalize = function(){
+String.prototype.capitalize = function() {
     return (
-    this.length === 0
-        ? ""
-        : this[0].toUpperCase() + this.substring(1).toLowerCase()
+        this.length === 0 ?
+        "" :
+        this[0].toUpperCase() + this.substring(1).toLowerCase()
     );
 };
 
@@ -48,7 +49,7 @@ Date.prototype.formatShortDate = function() {
     return `${this.getDate()} ${month_names[this.getMonth()]}`;
 };
 
-(function(d, w, $){
+(function(d, w, $) {
     // set "global" (within this scope) variables
     let timeOuts = [];
     let last_page = "";
@@ -56,7 +57,9 @@ Date.prototype.formatShortDate = function() {
     // add scripting part
     $('main').after(
         $.create(
-            "section", {id: "extra"}
+            "section", {
+                id: "extra"
+            }
         )
     );
 
@@ -65,63 +68,67 @@ Date.prototype.formatShortDate = function() {
      * @param activity Object
      * @return {Node}
      */
-    function makeActivityCard(activity){
+    function makeActivityCard(activity) {
         // initialize card, first element contains time
         let new_card = $.create(
             "section", {
                 className: "card card--start-animation",
-                contents: [
-                    {tag: "div", className: "card__time", contents:
-                        {tag:"h3", contents: [
-                                {tag: "span",
-                                    textContent: new Date(activity.date_time)
-                                    .formatShortDate()},
-
-                                {tag: "br"},
-
-                                {tag: "span", textContent: new Date(activity.date_time)
+                contents: [{
+                    tag: "div",
+                    className: "card__time",
+                    contents: {
+                        tag: "h3",
+                        contents: [
+                            {tag: "span",
+                                textContent: new Date(activity.date_time)
+                                    .formatShortDate()
+                            },
+                            {tag: "br"},
+                            {tag: "span",
+                                textContent: new Date(activity.date_time)
                                     .toLocaleTimeString('jpn')
                                     .split(':')
-                                    .slice(0,2)
-                                    .join(':')}
-
-                            ]
-                        }
+                                    .slice(0, 2)
+                                    .join(':')
+                            }
+                        ]
                     }
-                ]
+                }]
             });
 
         // create card__description
         var new_card_title = $.create(
-            "h4", {
-                textContent: activity.subject
-            }
+            "h4",
+            {textContent: activity.subject}
         );
 
         // add category if available
-        if (activity.links.category instanceof Object){
+        if (activity.links.category instanceof Object) {
             // get category data
             $.fetch(activity.links.category.href, {
                 method: "get",
                 responseType: "json"
-            }).then(function(cat_req){
+            }).then(function(cat_req) {
+                // add category upon successfully loading its data
                 category = cat_req.response;
 
-                // add category upon successfully loading its data
                 // hidden text
-                 new_card_title.appendChild($.create(
-                     "span", {
-                         className: "hidden",
-                         textContent: ", categorized in"
-                     }
+                new_card_title.appendChild($.create(
+                    "span", {
+                        className: "hidden",
+                        textContent: ", categorized in"
+                    }
                 ));
+
                 // card badge
                 new_card_title.appendChild(
                     $.create(
                         "span", {
                             className: "card__badge",
                             textContent: category.title,
-                            style: {"--badge-color": "#" + category.color.toString(16)}
+                            style: {
+                                "--badge-color": "#" + category.color.toString(16)
+                            }
                         }
                     )
                 )
@@ -131,10 +138,10 @@ Date.prototype.formatShortDate = function() {
         // make description
         let new_card_description = $.create(
             "div", {
-                className:"card__description",
+                className: "card__description",
                 contents: [
                     new_card_title,
-                    {tag:"p", textContent: activity.description}
+                    {tag: "p", textContent: activity.description}
                 ]
             }
         );
@@ -146,7 +153,11 @@ Date.prototype.formatShortDate = function() {
         };
 
         // create action list
-        let new_card_actions = $.create("ul", {class:"card__actions"});
+        let new_card_actions = $.create("ul", {
+            class: "card__actions"
+        });
+
+        // action buttons
         for (const key in card_links) {
             let new_action =
                 $.create(
@@ -160,21 +171,20 @@ Date.prototype.formatShortDate = function() {
                     }
                 );
 
-            if (key === "edit" || key === "delete") {
-                new_action.firstElementChild.addEventListener("click", function(e){
-                    e.preventDefault();
-                    // push page to history
-                    loadPage(this.href, true);
-                });
-            }
+            // associate links with their actions
+            new_action.firstElementChild.addEventListener("click", function(e) {
+                e.preventDefault();
+                loadPage(this.href, true);
+            });
 
+            // add buttons
             new_card_actions.appendChild(new_action);
         }
 
         // details = description + actions
         let new_card_details = $.create(
             "div", {
-                class:"card__details",
+                class: "card__details",
                 contents: [new_card_description, new_card_actions]
             }
         );
@@ -187,41 +197,35 @@ Date.prototype.formatShortDate = function() {
     /**
      * Create cards from Activity response, one-by-one.
      * Drawbacks:
-     * @param activities Activity object
+     * @param activities An array of activity objects
      */
-    function fadeActivitiesIn(activities) {
-        let x = 0;
+     function fadeActivitiesIn(activities) {
+        let activity_delay = 0;
         for (const activity of activities) {
-            x += 1;
+            activity_delay += 1;
             let main_node = $("main");
+
             timeOuts.push(
-                setTimeout(function (a){
+                setTimeout(function(activity) {
                     main_node.appendChild(
-                        makeActivityCard(a)
+                        makeActivityCard(activity)
                     );
-                }, 100*x, activity)
+                }, 100 * activity_delay, activity)
             );
         }
     }
 
     /**
-     * Handler for the "Show all activities" link
-     */
-    function addAllActivitiesHandler(all_activities_link) {
-
-    }
-
-    /**
      * Close any currently-opened form
      */
-    function closeForm(){
+    function closeForm() {
         let container = $(".fullsize-form-container");
 
         // exit early if no form is found
         if (!container) return;
 
         // remove form smoothly
-        container.addEventListener("animationend", function(e){
+        container.addEventListener("animationend", function(e) {
             container.remove();
         });
         container.classList.add("fullsize-form-container-out");
@@ -229,16 +233,18 @@ Date.prototype.formatShortDate = function() {
 
     /**
      * Delete everything in the page
-     * @return none
      */
     function clearWholePage() {
         while (true) {
             try { $("main").firstElementChild.remove() }
-            catch (e){ break; }
+            catch (e) { break; }
         }
     }
 
-    function addLoadingScreen(){
+    /**
+     * Add a loading screen to the page
+     */
+    function addLoadingScreen() {
         $("main").appendChild(
             $.create("div", {
                 className: "loading"
@@ -246,14 +252,15 @@ Date.prototype.formatShortDate = function() {
         )
     }
 
-    function removeLoadingScreen(){
-        $(".loading").remove();
-    }
+    /**
+     * Remove the loading screen
+     */
+    function removeLoadingScreen() { $(".loading").remove(); }
 
     /**
      * Clear all notifications
      */
-    function clearNotifications(){
+    function clearNotifications() {
         var notification;
         while (notification = $('.notification')) {
             notification.remove();
@@ -265,8 +272,9 @@ Date.prototype.formatShortDate = function() {
      * @param notification Object with the following keys:
      *  - type: "error", "success" or "normal"
      *  - message: "Notification message"
+     * @example popNotification({type: "success", message: "Action completed successfully"})
      */
-    function popNotification(notification){
+    function pushNotification(notification) {
         // delete all existing notifications first
         clearNotifications();
 
@@ -280,8 +288,8 @@ Date.prototype.formatShortDate = function() {
             );
 
         // close automatically after 3 seconds
-        setTimeout(function(){
-            new_notification.addEventListener("animationend", function(e){
+        setTimeout(function() {
+            new_notification.addEventListener("animationend", function(e) {
                 new_notification.remove();
             });
             new_notification.classList.add("notification--animation-end");
@@ -295,7 +303,7 @@ Date.prototype.formatShortDate = function() {
      * Show the edit form for an activity
      * @param activity|null Activity to edit, or for new activities, null.
      */
-    function createEditForm(activity){
+    function createEditForm(activity) {
         // close existing forms
         closeForm();
 
@@ -318,34 +326,78 @@ Date.prototype.formatShortDate = function() {
             "form", {
                 id: "edit-form",
                 className: "form-begin-animation",
-                contents: [
-                    {tag: "fieldset", contents: [
-                        {tag:"legend", textContent:"Activity Details"},
-                        {tag:"label", for:"subject", textContent:"Subject"},
-                        {tag:"input", type:"text", id:"subject", name:"subject", value:activity.subject},
-                        {tag:"br"},
-                        {tag:"label", for:"description", textContent:"Description"},
-                        {tag:"textarea", id:"description", name:"description", rows:3, textContent:activity.description},
-                        {tag: "br"},
-                        {tag:"label", for:"category", textContent:"Category"},
-                        {tag:"select", name:"category", id:"category", contents:[
-                            $.create("option", {value:"", textContent:"-- No category --"})
-                        ]}
-                    ]},
-                    {tag: "fieldset", className: "hidden-and-submit", contents: [
-                        {
-                            tag:"input",
-                            id: "submit",
-                            type:"submit",
-                            className: "button button--edit"
-                        },
-                        {
-                            tag:"button",
-                            id: "cancel",
-                            textContent: "Cancel",
-                            className: "button button--view"
-                        }
-                    ]}
+                contents: [{
+                        tag: "fieldset",
+                        contents: [
+                            {
+                                tag: "legend",
+                                textContent: "Activity Details"
+                            },
+                            {
+                                tag: "label",
+                                for: "subject",
+                                textContent: "Subject"
+                            },
+                            {
+                                tag: "input",
+                                type: "text",
+                                id: "subject",
+                                name: "subject",
+                                value: activity.subject
+                            },
+                            {
+                                tag: "br"
+                            },
+                            {
+                                tag: "label",
+                                for: "description",
+                                textContent: "Description"
+                            },
+                            {
+                                tag: "textarea",
+                                id: "description",
+                                name: "description",
+                                rows: 3,
+                                textContent: activity.description
+                            },
+                            {
+                                tag: "br"
+                            },
+                            {
+                                tag: "label",
+                                for: "category",
+                                textContent: "Category"
+                            },
+                            {
+                                tag: "select",
+                                name: "category",
+                                id: "category",
+                                contents: [
+                                    $.create("option", {
+                                        value: "",
+                                        textContent: "-- No category --"
+                                    })
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        tag: "fieldset",
+                        className: "hidden-and-submit",
+                        contents: [{
+                                tag: "input",
+                                id: "submit",
+                                type: "submit",
+                                className: "button button--edit"
+                            },
+                            {
+                                tag: "button",
+                                id: "cancel",
+                                textContent: "Cancel",
+                                className: "button button--view"
+                            }
+                        ]
+                    }
                 ]
             }
         );
@@ -358,20 +410,20 @@ Date.prototype.formatShortDate = function() {
             }
         );
 
-        // add categories
+        // add categories to the selection
         let categories = edit_form.querySelector("#category");
 
         $.fetch("/api/category", {
             method: "get",
             responseType: "json"
-        }).then(function(cat_req){
+        }).then(function(cat_req) {
             categories_list = cat_req.response;
             for (let category of categories_list) {
                 let cat_option = $.create(
                     "option", {
-                        value:category.id,
-                        textContent:category.title
-                        }
+                        value: category.id,
+                        textContent: category.title
+                    }
                 );
 
                 // automatically select the activity's category
@@ -387,9 +439,9 @@ Date.prototype.formatShortDate = function() {
 
         // Save changes
         let submit_button = edit_form.submit;
-        submit_button.addEventListener("click", function(e){
+        submit_button.addEventListener("click", function(e) {
             e.preventDefault();
-            popNotification({
+            pushNotification({
                 type: "normal",
                 message: "Editing activity, please wait."
             });
@@ -409,22 +461,22 @@ Date.prototype.formatShortDate = function() {
                     description: edit_form_data.get("description"),
                     category: edit_form_data.get("category")
                 })
-            }).then(function(e){
-                popNotification({
+            }).then(function(e) {
+                pushNotification({
                     type: "success",
                     message: "Activity edited successfully!"
                 });
                 // refresh all activities
                 loadPage(last_page, true);
                 closeForm();
-            }).catch(function(e){
-                popNotification({
+            }).catch(function(e) {
+                pushNotification({
                     type: "error",
                     message: "Can't edit activity, try again later."
                 });
             })
 
-            popNotification({
+            pushNotification({
                 type: "normal",
                 message: "Editing activity, please wait."
             });
@@ -432,7 +484,7 @@ Date.prototype.formatShortDate = function() {
 
         // Cancel editing
         let cancel_button = edit_form.querySelector("#cancel");
-        cancel_button.addEventListener("click", function(e){
+        cancel_button.addEventListener("click", function(e) {
             e.preventDefault();
             history.pushState({}, '', last_page);
             closeForm();
@@ -444,7 +496,7 @@ Date.prototype.formatShortDate = function() {
      * Show the delete form for an activity
      * @param activity Activity
      */
-    function createDeleteForm(activity){
+    function createDeleteForm(activity) {
         // close existing forms
         closeForm();
 
@@ -453,30 +505,43 @@ Date.prototype.formatShortDate = function() {
             "form", {
                 id: "delete-form",
                 className: "form-begin-animation",
-                contents: [
-                    {tag: "fieldset", contents: [
-                        {tag:"legend", textContent:"Confirm deletion"},
-                        {tag:"p", contents: [
-                            "Are you sure you want to ",
-                            {tag: "strong", textContent: "delete"},
-                            " this activity?"
-                        ]},
-                    ]},
-                    {tag: "fieldset", className: "hidden-and-submit", contents: [
-                        {
-                            tag:"input",
-                            id: "delete",
-                            type:"submit",
-                            value: "Delete",
-                            className: "button button--delete"
-                        },
-                        {
-                            tag:"button",
-                            id: "cancel",
-                            textContent: "Cancel",
-                            className: "button button--view"
-                        }
-                    ]}
+                contents: [{
+                        tag: "fieldset",
+                        contents: [{
+                                tag: "legend",
+                                textContent: "Confirm deletion"
+                            },
+                            {
+                                tag: "p",
+                                contents: [
+                                    "Are you sure you want to ",
+                                    {
+                                        tag: "strong",
+                                        textContent: "delete"
+                                    },
+                                    " this activity?"
+                                ]
+                            },
+                        ]
+                    },
+                    {
+                        tag: "fieldset",
+                        className: "hidden-and-submit",
+                        contents: [{
+                                tag: "input",
+                                id: "delete",
+                                type: "submit",
+                                value: "Delete",
+                                className: "button button--delete"
+                            },
+                            {
+                                tag: "button",
+                                id: "cancel",
+                                textContent: "Cancel",
+                                className: "button button--view"
+                            }
+                        ]
+                    }
                 ]
             }
         );
@@ -491,9 +556,9 @@ Date.prototype.formatShortDate = function() {
 
         // Confirm deletion
         let delete_button = delete_form.delete;
-        delete_button.addEventListener("click", function(e){
+        delete_button.addEventListener("click", function(e) {
             e.preventDefault();
-            popNotification({
+            pushNotification({
                 type: "normal",
                 message: "Deleting activity, please wait."
             });
@@ -505,23 +570,23 @@ Date.prototype.formatShortDate = function() {
                 headers: {
                     "Content-Type": "application/json"
                 }
-            }).then(function(e){
-                popNotification({
+            }).then(function(e) {
+                pushNotification({
                     type: "success",
                     message: "Activity deleted successfully!"
                 });
                 // refresh all activities
                 loadPage(last_page, true);
                 closeForm();
-            }).catch(function(e){
-                popNotification({
+            }).catch(function(e) {
+                pushNotification({
                     type: "error",
                     message: "Can't delete activity, try again later."
                 });
             });
 
             // make request
-            popNotification({
+            pushNotification({
                 type: "normal",
                 message: "Deleting activity, please wait."
             });
@@ -529,7 +594,7 @@ Date.prototype.formatShortDate = function() {
 
         // Cancel editing
         let cancel_button = delete_form.querySelector("#cancel");
-        cancel_button.addEventListener("click", function(e){
+        cancel_button.addEventListener("click", function(e) {
             e.preventDefault();
             history.pushState({}, '', last_page);
             closeForm();
@@ -544,6 +609,7 @@ Date.prototype.formatShortDate = function() {
      * @param push_to_history Bool
      */
     function loadPage(page_name, push_to_history) {
+        // only keep track of last page if it is different
         if (last_page != location.pathname)
             last_page = location.pathname;
 
@@ -559,12 +625,12 @@ Date.prototype.formatShortDate = function() {
             $.fetch(`/api/activity/${special_case[1]}`, {
                 method: "get",
                 responseType: "json"
-            }).then(function(e){
+            }).then(function(e) {
                 let activity = e.response;
                 $('#extra').appendChild(createEditForm(activity));
                 removeLoadingScreen();
-            }).catch(function(e){
-                popNotification({
+            }).catch(function(e) {
+                pushNotification({
                     type: "error",
                     message: "Failed to load activity for editing"
                 });
@@ -579,12 +645,12 @@ Date.prototype.formatShortDate = function() {
             $.fetch(`/api/activity/${special_case[1]}`, {
                 method: "get",
                 responseType: "json"
-            }).then(function(e){
+            }).then(function(e) {
                 let activity = e.response;
                 $('#extra').appendChild(createDeleteForm(activity));
                 removeLoadingScreen();
-            }).catch(function(e){
-                popNotification({
+            }).catch(function(e) {
+                pushNotification({
                     type: "error",
                     message: "Failed to load activity for deleting"
                 });
@@ -607,7 +673,7 @@ Date.prototype.formatShortDate = function() {
                 $.fetch("/api/activity/?for=today", {
                     method: "get",
                     responseType: "json"
-                }).then(function(e){
+                }).then(function(e) {
                     activities = e.response;
                     // clear existing timeouts (prevent duplicate card bug)
                     var timeout;
@@ -625,9 +691,17 @@ Date.prototype.formatShortDate = function() {
                         $.create(
                             "header", {
                                 className: "activity-heading",
-                                contents: [
-                                    {tag: "h2", textContent: `Today's Activities (${date.formatDate()})`},
-                                    {tag: "a", id: "add", textContent: "Add", href: "add", className: "button button--add"}
+                                contents: [{
+                                        tag: "h2",
+                                        textContent: `Today's Activities (${date.formatDate()})`
+                                    },
+                                    {
+                                        tag: "a",
+                                        id: "add",
+                                        textContent: "Add",
+                                        href: "add",
+                                        className: "button button--add"
+                                    }
                                 ]
                             }
                         )
@@ -646,7 +720,7 @@ Date.prototype.formatShortDate = function() {
 
                     // activities
                     fadeActivitiesIn(activities);
-                }).catch(function(e){
+                }).catch(function(e) {
                     console.log(e.status)
                 })
                 break;
@@ -658,7 +732,7 @@ Date.prototype.formatShortDate = function() {
                 $.fetch("/api/activity/", {
                     method: "get",
                     responseType: "json"
-                }).then(function(e){
+                }).then(function(e) {
                     activities = e.response;
                     // clear existing timeouts (prevent duplicate card bug)
                     var timeout;
@@ -674,9 +748,17 @@ Date.prototype.formatShortDate = function() {
                         $.create(
                             "header", {
                                 className: "activity-heading",
-                                contents: [
-                                    {tag: "h2", textContent: "All Activities"},
-                                    {tag: "a", id: "add", textContent: "Add", href: "add", className: "button button--add"}
+                                contents: [{
+                                        tag: "h2",
+                                        textContent: "All Activities"
+                                    },
+                                    {
+                                        tag: "a",
+                                        id: "add",
+                                        textContent: "Add",
+                                        href: "add",
+                                        className: "button button--add"
+                                    }
                                 ]
                             }
                         )
@@ -686,7 +768,7 @@ Date.prototype.formatShortDate = function() {
 
                     // activities
                     fadeActivitiesIn(activities);
-                }).catch(function(e){
+                }).catch(function(e) {
                     console.log(e.status)
                 })
                 break;
@@ -704,13 +786,13 @@ Date.prototype.formatShortDate = function() {
     /**
      * Add button handlers for the main page
      */
-    function addMainPageHandlers(){
+    function addMainPageHandlers() {
         // Main page controls
         addCommonHandlers();
         let view_all_activities = d.getElementById("view-all-activities");
         if (view_all_activities instanceof Node) {
             Object.getPrototypeOf(view_all_activities).click_counter = 0
-            view_all_activities.addEventListener("click", function(e){
+            view_all_activities.addEventListener("click", function(e) {
                 e.preventDefault();
                 // prevent re-calling when link is clicked multiple times
                 if (this.click_counter > 0) return;
@@ -723,11 +805,11 @@ Date.prototype.formatShortDate = function() {
     /**
      * Add handlers for card buttons
      */
-    function addCommonHandlers(){
+    function addCommonHandlers() {
         // enhance Add button
         let add_activity_button = d.getElementById("add");
         if (add_activity_button instanceof Node) {
-            add_activity_button.addEventListener("click", function(e){
+            add_activity_button.addEventListener("click", function(e) {
                 e.preventDefault();
                 loadPage("/activity/add", true);
             })
@@ -735,14 +817,12 @@ Date.prototype.formatShortDate = function() {
 
         // enhance actions in cards
         for (
-            var
-                edit_buttons = $.$("section.card .button--edit"),
-                i = 0;
+            var edit_buttons = $.$("section.card .button--edit"), i = 0;
             i < edit_buttons.length;
             i++
         ) {
             let edit_button = edit_buttons[i]
-            edit_button.addEventListener("click", function(e){
+            edit_button.addEventListener("click", function(e) {
                 e.preventDefault();
                 loadPage(edit_button.href, true);
             });
@@ -750,13 +830,12 @@ Date.prototype.formatShortDate = function() {
 
         for (
             var
-                delete_buttons = $.$("section.card .button--delete"),
-                i = 0;
-            i < delete_buttons.length;
-            i++
+                delete_buttons = $.$("section.card .button--delete"), i = 0;
+                i < delete_buttons.length;
+                i++
         ) {
             let delete_button = delete_buttons[i]
-            delete_button.addEventListener("click", function(e){
+            delete_button.addEventListener("click", function(e) {
                 e.preventDefault();
                 loadPage(delete_button.href, true);
             });
