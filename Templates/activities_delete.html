@@ -1,0 +1,27 @@
+{% extends Templates/_base.html %}
+
+{% block title %}
+{{{ $page_title }}}
+{% endblock %}
+
+{% block content %}
+<header class="activity-heading">
+    <h2>{{{ $page_heading }}}</h2>
+</header>
+
+{% if (!empty($activity)): %}
+<form method="post" id="delete-form">
+    <fieldset>
+        <legend>Confirm deletion</legend>
+        <p>Are you sure you want to <strong>delete</strong> this activity?<br>(Press back to cancel)</p>
+    </fieldset>
+    <fieldset class="hidden-and-submit">
+        <input type="hidden" name="anticsrf" value="MyACSRFValue">
+        <input type="submit" class="button button--delete" value="Delete">
+    </fieldset>
+</form>
+{% else: %}
+<p>Invalid activity ID.</p>
+{% endif; %}
+
+{% endblock %}

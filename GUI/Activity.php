@@ -45,12 +45,12 @@
     }, 'get');
 
     /*
-     * Edit one activity
+     * Edit an activity
      */
     Route::add('/([0-9a-f]{8})/edit', function($id){
         $activity = Activity::searchById(Util::$db, $id);
         $category_list = Category::getAll(Util::$db);
-        
+
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             // handle invalid activity
             if (empty($activity)) {
@@ -61,13 +61,14 @@
                 ]);
                 return;
             }
-            
+
             // Apply changes
             $activity->setSubject($_POST['subject']);
             $activity->setDescription($_POST['description']);
             $category = Category::searchById(Util::$db, $_POST['category']);
             $activity->setCategory($category);
             if ($activity->replaceDatabaseEntry()){
+                // redirect to main page
                 header('Location: /activity/');
                 return;
             }
@@ -93,6 +94,37 @@
     }, ['get', 'post']);
 
     /*
+     * Delete an activity
+     */
+    Route::add('/([0-9a-f]{8})/delete', function($id){
+        $activity = Activity::searchById(Util::$db, $id);
+
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            if ($activity->deleteFromDatabase()) {
+                header('Location: /activity/');
+                return;
+            }
+
+            Template::view('Templates/activities_delete.html', [
+                'page_title' => 'Activity delete',
+                'page_heading' => 'Delete Activity',
+                'activity' => $activity,
+                'notifications' => [
+                    ['type'=>'error', 'message'=>'Could not delete activity']
+                ]
+            ]);
+            return;
+        }
+
+        // GET
+        Template::view('Templates/activities_delete.html', [
+            'page_title' => 'Activity delete',
+            'page_heading' => 'Delete Activity',
+            'activity' => $activity
+        ]);
+    }, ['get', 'post']);
+
+    /*
      * Add an activity
      */
     Route::add('/add', function(){
@@ -107,7 +139,7 @@
             new DateTime(),
             null
         );
-        
+
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $array = $_POST;
             // subject and description cannot be empty
@@ -133,14 +165,14 @@
                     Category::searchById(Util::$db, $array['category'])
                 );
             }
-            
+
             $activity->setSubject(Util::sanitize($array['subject']));
             $activity->setSubject(Util::sanitize($array['description']));
             $activity->addToDatabase();
             header('Location: /activity/');
             return;
         }
-        
+
         Template::view('Templates/activities_edit.html', [
             'page_title' => 'Activity edit',
             'page_heading' => 'Edit Activity',

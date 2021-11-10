@@ -52,14 +52,14 @@ Date.prototype.formatShortDate = function() {
     // set "global" (within this scope) variables
     let timeOuts = [];
     let last_page = "";
-    
+
     // add scripting part
     $('main').after(
         $.create(
             "section", {id: "extra"}
         )
     );
-    
+
     /**
      * Create an activity card with subject, description and actions
      * @param activity Object
@@ -71,20 +71,20 @@ Date.prototype.formatShortDate = function() {
             "section", {
                 className: "card card--start-animation",
                 contents: [
-                    {tag: "div", className: "card__time", contents: 
+                    {tag: "div", className: "card__time", contents:
                         {tag:"h3", contents: [
                                 {tag: "span",
                                     textContent: new Date(activity.date_time)
                                     .formatShortDate()},
-                                
+
                                 {tag: "br"},
-                                
+
                                 {tag: "span", textContent: new Date(activity.date_time)
                                     .toLocaleTimeString('jpn')
                                     .split(':')
                                     .slice(0,2)
                                     .join(':')}
-                                
+
                             ]
                         }
                     }
@@ -127,7 +127,7 @@ Date.prototype.formatShortDate = function() {
                    )
                )
             });
-            
+
             // perform request
             req.open('get', activity.links.category.href);
             req.send();
@@ -164,15 +164,15 @@ Date.prototype.formatShortDate = function() {
                         }
                     }
                 );
-                
-            if (key === "edit") {
+
+            if (key === "edit" || key === "delete") {
                 new_action.firstElementChild.addEventListener("click", function(e){
                     e.preventDefault();
                     // push page to history
                     loadPage(this.href, true);
                 });
             }
-            
+
             new_card_actions.appendChild(new_action);
         }
 
@@ -191,7 +191,7 @@ Date.prototype.formatShortDate = function() {
 
     /**
      * Create cards from Activity response, one-by-one.
-     * Drawbacks: 
+     * Drawbacks:
      * @param activities Activity object
      */
     function fadeActivitiesIn(activities) {
@@ -213,25 +213,25 @@ Date.prototype.formatShortDate = function() {
      * Handler for the "Show all activities" link
      */
     function addAllActivitiesHandler(all_activities_link) {
-        
+
     }
-    
+
     /**
      * Close any currently-opened form
      */
     function closeForm(){
         let container = $(".fullsize-form-container");
-        
+
         // exit early if no form is found
         if (!container) return;
-        
+
         // remove form smoothly
         container.addEventListener("animationend", function(e){
             container.remove();
         });
         container.classList.add("fullsize-form-container-out");
     };
-    
+
     /**
      * Clear all notifications
      */
@@ -241,6 +241,7 @@ Date.prototype.formatShortDate = function() {
             notification.remove();
         }
     };
+
     /**
      * Show a notification
      * @param notification Object with the following keys:
@@ -250,16 +251,16 @@ Date.prototype.formatShortDate = function() {
     function popNotification(notification){
         // delete all existing notifications first
         clearNotifications();
-        
+
         // create a new notification
-        let new_notification = 
+        let new_notification =
             $.create(
                 "div", {
                     className: `notification notification--${notification.type}`,
                     textContent: notification.message
                 }
             );
-        
+
         // close automatically after 3 seconds
         setTimeout(function(){
             new_notification.addEventListener("animationend", function(e){
@@ -267,11 +268,11 @@ Date.prototype.formatShortDate = function() {
             });
             new_notification.classList.add("notification--animation-end");
         }, 3000);
-        
+
         // show the notification
         $('#extra').appendChild(new_notification)
     };
-    
+
     /**
      * Show the edit form for an activity
      * @param activity|null Activity to edit, or for new activities, null.
@@ -279,7 +280,7 @@ Date.prototype.formatShortDate = function() {
     function createEditForm(activity){
         // close existing forms
         closeForm();
-        
+
         // if no activity is passed, assume we are making a new one
         if (activity == null) {
             activity = {
@@ -293,7 +294,7 @@ Date.prototype.formatShortDate = function() {
                 }
             }
         }
-        
+
         // make the actual form
         let edit_form = $.create(
             "form", {
@@ -330,7 +331,7 @@ Date.prototype.formatShortDate = function() {
                 ]
             }
         );
-        
+
         // Add container for form overlay
         let edit_form_container = $.create(
             "div", {
@@ -338,7 +339,7 @@ Date.prototype.formatShortDate = function() {
                 contents: [edit_form]
             }
         );
-        
+
         // add categories
         let categories = edit_form.querySelector("#category");
         let category_fetch = new XMLHttpRequest();
@@ -348,7 +349,7 @@ Date.prototype.formatShortDate = function() {
             } catch (e) {
                 return;
             }
-            
+
             for (let category of categories_list) {
                 let cat_option = $.create(
                     "option", {
@@ -356,20 +357,20 @@ Date.prototype.formatShortDate = function() {
                         textContent:category.title
                         }
                 );
-                
+
                 // automatically select the activity's category
                 try {
                     if (activity.links.category.id == category.id)
                         cat_option.selected = true
                 } catch (e) {}
-                
+
                 // add categories to selection
                 categories.appendChild(cat_option);
             }
         });
         category_fetch.open("get", "/api/category");
         category_fetch.send();
-        
+
         // Save changes
         let submit_button = edit_form.submit;
         submit_button.addEventListener("click", function(e){
@@ -378,7 +379,7 @@ Date.prototype.formatShortDate = function() {
                 type: "normal",
                 message: "Editing activity, please wait."
             });
-            
+
             // custom submit event
             let submit_event = new XMLHttpRequest();
             submit_event.addEventListener("load", function(f){
@@ -398,10 +399,10 @@ Date.prototype.formatShortDate = function() {
                 loadPage(last_page, true);
                 closeForm();
             });
-            
+
             // extract form data
             edit_form_data = new FormData(edit_form);
-            
+
             // make request
             submit_event.open(
                 activity.links.edit.method,
@@ -420,7 +421,7 @@ Date.prototype.formatShortDate = function() {
                 message: "Editing activity, please wait."
             });
         });
-        
+
         // Cancel editing
         let cancel_button = edit_form.querySelector("#cancel");
         cancel_button.addEventListener("click", function(e){
@@ -432,20 +433,124 @@ Date.prototype.formatShortDate = function() {
     }
 
     /**
+     * Show the delete form for an activity
+     * @param activity Activity
+     */
+    function createDeleteForm(activity){
+        // close existing forms
+        closeForm();
+
+        // make the actual form
+        let delete_form = $.create(
+            "form", {
+                id: "delete-form",
+                className: "form-begin-animation",
+                contents: [
+                    {tag: "fieldset", contents: [
+                        {tag:"legend", textContent:"Confirm deletion"},
+                        {tag:"p", contents: [
+                            "Are you sure you want to ",
+                            {tag: "strong", textContent: "delete"},
+                            " this activity?"
+                        ]},
+                    ]},
+                    {tag: "fieldset", className: "hidden-and-submit", contents: [
+                        {
+                            tag:"input",
+                            id: "delete",
+                            type:"submit",
+                            value: "Delete",
+                            className: "button button--delete"
+                        },
+                        {
+                            tag:"button",
+                            id: "cancel",
+                            textContent: "Cancel",
+                            className: "button button--view"
+                        }
+                    ]}
+                ]
+            }
+        );
+
+        // Add container for form overlay
+        let delete_form_container = $.create(
+            "div", {
+                className: "fullsize-form-container",
+                contents: [delete_form]
+            }
+        );
+
+        // Confirm deletion
+        let delete_button = delete_form.delete;
+        delete_button.addEventListener("click", function(e){
+            e.preventDefault();
+            popNotification({
+                type: "normal",
+                message: "Deleting activity, please wait."
+            });
+
+            // Perform deletion
+            let delete_event = new XMLHttpRequest();
+            delete_event.addEventListener("load", function(f){
+                // bad request or error
+                if (this.status != 204) {
+                    popNotification({
+                        type: "error",
+                        message: "Can't delete activity, try again later."
+                    });
+                    return;
+                }
+                popNotification({
+                    type: "success",
+                    message: "Activity deleted successfully!"
+                });
+                // refresh all activities
+                loadPage(last_page, true);
+                closeForm();
+            });
+
+            // make request
+            delete_event.open(
+                activity.links.delete.method,
+                activity.links.delete.href
+            );
+            delete_event.setRequestHeader(
+                "Content-Type", "application/json"
+            );
+            delete_event.send();
+            popNotification({
+                type: "normal",
+                message: "Deleting activity, please wait."
+            });
+        });
+
+        // Cancel editing
+        let cancel_button = delete_form.querySelector("#cancel");
+        cancel_button.addEventListener("click", function(e){
+            e.preventDefault();
+            history.pushState({}, '', last_page);
+            closeForm();
+        });
+        return delete_form_container;
+    }
+
+
+    /**
      * Loads a page depending on the URL.
      * @param page_name
      * @param push_to_history Bool
      */
     function loadPage(page_name, push_to_history) {
-        
+
         last_page = location.pathname;
-        
+
         if (push_to_history)
             history.pushState({}, '', page_name);
-        
+
         let activities, req;
         let special_case = null;
-        
+
         // special cases: load edit page
         if (special_case = /\/activity\/([0-9a-f]{8})\/edit\/?$/.exec(page_name)) {
             let activity_req = new XMLHttpRequest();
@@ -458,9 +563,9 @@ Date.prototype.formatShortDate = function() {
                     });
                     return;
                 };
-                
+
                 let activity;
-                
+
                 // verify JSON
                 try { activity = JSON.parse(this.responseText) }
                 catch (e) {
@@ -470,7 +575,7 @@ Date.prototype.formatShortDate = function() {
                     });
                     return;
                 }
-                
+
                 $('#extra').appendChild(createEditForm(activity));
             });
             activity_req.open('get', `/api/activity/${special_case[1]}`);
@@ -478,28 +583,55 @@ Date.prototype.formatShortDate = function() {
             console.log("Edit page invoked");
             return;
         }
-        
+
         // special cases: load delete page
         if (special_case = /\/activity\/([0-9a-f]{8})\/delete\/?$/.exec(page_name)) {
+            let activity_req = new XMLHttpRequest();
+            activity_req.addEventListener("load", function(e){
+                // exit on error
+                if (this.status != 200) {
+                    popNotification({
+                        type: "error",
+                        message: "Failed to load activity for deleting"
+                    });
+                    return;
+                };
+
+                let activity;
+
+                // verify JSON
+                try { activity = JSON.parse(this.responseText) }
+                catch (e) {
+                    popNotification({
+                        type: "error",
+                        message: "Failed to load activity for deleting"
+                    });
+                    return;
+                }
+
+                $('#extra').appendChild(createDeleteForm(activity));
+            });
+            activity_req.open('get', `/api/activity/${special_case[1]}`);
+            activity_req.send();
             console.log("Delete page invoked");
             return;
         }
-        
+
         // close all forms
         closeForm();
-        
+
         switch (page_name) {
             case "/activity/add":
                 $('#extra').appendChild(createEditForm(null));
                 break;
-                
+
             case "/activity/":
                 //$(".activity-heading h2").textContent = "Today's Activities";
                 req = new XMLHttpRequest();
                 req.addEventListener("load", function(e){
                     // load activities
                     try { activities = JSON.parse(this.responseText) } catch (e) { return; }
-                    
+
                     // clear existing timeouts (prevent duplicate card bug)
                     var timeout;
                     while (timeout = timeOuts.pop()) {
@@ -537,7 +669,7 @@ Date.prototype.formatShortDate = function() {
                             href: "all"
                         });
                     $('main').appendChild(all_activities_link);
-                    
+
                     addMainPageHandlers();
 
                     // activities
@@ -556,13 +688,13 @@ Date.prototype.formatShortDate = function() {
                 req.addEventListener("load", function(e){
                     // load activities
                     try { activities = JSON.parse(this.responseText) } catch (e) { return; }
-                    
+
                     // clear existing timeouts (prevent duplicate card bug)
                     var timeout;
                     while (timeout = timeOuts.pop()) {
                         clearTimeout(timeout);
                     }
-                    
+
                     // delete everything in main
                     while (true) {
                         try { $('main').firstElementChild.remove() }
@@ -583,7 +715,7 @@ Date.prototype.formatShortDate = function() {
                             }
                         )
                     );
-                    
+
                     addCommonHandlers();
 
                     // activities
@@ -624,7 +756,7 @@ Date.prototype.formatShortDate = function() {
             })
         }
     };
-    
+
     /**
      * Add handlers for card buttons
      */
@@ -637,7 +769,7 @@ Date.prototype.formatShortDate = function() {
                 loadPage("/activity/add", true);
             })
         }
-        
+
         // enhance actions in cards
         for (
             var
@@ -652,8 +784,22 @@ Date.prototype.formatShortDate = function() {
                 loadPage(edit_button.href, true);
             });
         }
+
+        for (
+            var
+                delete_buttons = $.$("section.card .button--delete"),
+                i = 0;
+            i < delete_buttons.length;
+            i++
+        ) {
+            let delete_button = delete_buttons[i]
+            delete_button.addEventListener("click", function(e){
+                e.preventDefault();
+                loadPage(delete_button.href, true);
+            });
+        }
     };
-    
+
     addMainPageHandlers();
-    
+
 })(document, window, Bliss);
