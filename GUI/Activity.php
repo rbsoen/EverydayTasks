@@ -171,7 +171,7 @@
             }
 
             $activity->setSubject(Util::sanitize($array['subject']));
-            $activity->setSubject(Util::sanitize($array['description']));
+            $activity->setDescription(Util::sanitize($array['description']));
             $activity->addToDatabase();
             header('Location: /activity/');
             return;
