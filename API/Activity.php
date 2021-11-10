@@ -64,10 +64,9 @@
             return;
         }
 
-        // subject and description cannot be empty
+        // subject cannot be empty
         if (
-            empty($array['subject']) ||
-            empty($array['description'])
+            empty($array['subject'])
         ) {
             http_response_code(ResponseCode::BAD_REQUEST);
             return;
@@ -201,6 +200,11 @@
 
         // Change activity subject
         if (isset($arguments->subject)){
+            // subject must not be empty
+            if (empty($arguments->subject)) {
+                http_response_code(ResponseCode::BAD_REQUEST);
+                return;
+            }
             $activity->setSubject($arguments->subject);
             $changed = true;
         }
