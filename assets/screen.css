@@ -425,3 +425,45 @@ form input:focus, form textarea:focus, form select:focus {
 	from { bottom: 0; }
 	to { bottom: -9em; }
 }
+
+.loading  {
+	background-color: rgba(0,0,0,.5);
+	width: 100%;
+	height: 100%;
+	position: absolute;
+	top: 0;
+	left: 0;
+    animation: var(--animation-length) form-fade-in;
+}
+
+.loading:before {
+	content: "";
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	width: 6em;
+	height: 6em;
+	border: 1em solid var(--white);
+	border-top-color: var(--orange);
+	border-left-color: var(--blue);
+	border-bottom-color: var(--orange);
+	border-radius: 100%;
+	animation: 1s loading-animation infinite linear;
+}
+
+.loading:after {
+	content: "Loading";
+	transform: rotate(0deg);
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, 3em);
+	color: white;
+	font-size: 2em;
+}
+
+@keyframes loading-animation {
+	from {transform: translate(-50%, -50%) rotate(0deg);}
+	to {transform: translate(-50%, -50%) rotate(360deg);}
+}
