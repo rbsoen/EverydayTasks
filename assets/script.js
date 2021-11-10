@@ -319,12 +319,14 @@ Date.prototype.formatShortDate = function() {
     };
 
     /**
-     * Show the edit form for an activity
+     * Show the edit or new form for an activity
      * @param activity|null Activity to edit, or for new activities, null.
      */
     function createEditForm(activity) {
         // close existing forms
         closeForm();
+
+        let is_new_activity = false;
 
         // if no activity is passed, assume we are making a new one
         if (activity == null) {
@@ -338,6 +340,7 @@ Date.prototype.formatShortDate = function() {
                     }
                 }
             }
+            is_new_activity = true;
         }
 
         // make the actual form
@@ -464,10 +467,18 @@ Date.prototype.formatShortDate = function() {
         let submit_button = edit_form.submit;
         submit_button.addEventListener("click", function(e) {
             e.preventDefault();
-            pushNotification({
-                type: "normal",
-                message: "Editing activity, please wait."
-            });
+
+            if (is_new_activity) {
+                pushNotification({
+                    type: "normal",
+                    message: "Creating activity, please wait."
+                });
+            } else {
+                pushNotification({
+                    type: "normal",
+                    message: "Editing activity, please wait."
+                });
+            }
 
             // extract form data
             edit_form_data = new FormData(edit_form);
@@ -488,26 +499,35 @@ Date.prototype.formatShortDate = function() {
                     })
                 },
                 function(e) {
-                    pushNotification({
-                        type: "success",
-                        message: "Activity edited successfully!"
-                    });
+                    if (is_new_activity) {
+                        pushNotification({
+                            type: "success",
+                            message: "Activity created successfully!"
+                        });
+                    } else {
+                        pushNotification({
+                            type: "success",
+                            message: "Activity edited successfully!"
+                        });
+                    }
                     // refresh all activities
                     loadPage(last_page, true);
                     closeForm();
                 },
                 function(e) {
-                    pushNotification({
-                        type: "error",
-                        message: "Can't edit activity, try again later."
-                    });
+                    if (is_new_activity) {
+                        pushNotification({
+                            type: "error",
+                            message: "Can't create activity, try again later."
+                        });
+                    } else {
+                        pushNotification({
+                            type: "error",
+                            message: "Can't edit activity, try again later."
+                        });
+                    }
                 }
             );
-
-            pushNotification({
-                type: "normal",
-                message: "Editing activity, please wait."
-            });
         });
 
         // Cancel editing
