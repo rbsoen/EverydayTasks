@@ -10,22 +10,21 @@
 </header>
 
 {% if (!empty($activity)): %}
-<form method="post">
+<form method="post" id="edit-form">
     <fieldset>
         <legend>Activity Details</legend>
         <label for="subject">Subject</label>
         <input type="text" id="subject" name="subject" value="{{{ $activity->getSubject() }}}">
         <br>
         <label for="description">Description</label>
-        <textarea id="description" name="description" rows="3">Dolor sit amet</textarea>
+        <textarea id="description" name="description" rows="3">{{{ $activity->getDescription() }}}</textarea>
         <br>
         <label for="category">Category</label>
         <select name="category" id="category">
-            <option value="a">AAAA</option>
-            <option value="b">B</option>
-            <option value="c">CCC</option>
-            <option value="d">DD</option>
-            <option value="e">EEE</option>
+        {% foreach ( $category_list as $category ): %}
+            <option value="">-- No category --</option>
+            <option value="{{{ $category->getID() }}}" {% if($activity->getCategory() == $category) echo "selected" %}>{{{ $category->getTitle() }}}</option>
+        {% endforeach; %}
         </select>
     </fieldset>
     <fieldset class="hidden-and-submit">

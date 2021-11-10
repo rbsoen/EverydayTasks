@@ -10,6 +10,7 @@
         public const CREATED = 201;
         public const NO_CONTENT = 204;
 
+        public const MOVED_PERMANENTLY = 301;
         public const NOT_MODIFIED = 304;
 
         public const BAD_REQUEST = 400;

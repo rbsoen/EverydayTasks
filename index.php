@@ -15,8 +15,8 @@
     require_once 'Library/Category.php';
 
     // Routing and Templating
-require_once 'Library/External/Route.php';
-require_once 'Library/External/Template.php';
+	require_once 'Library/External/Route.php';
+	require_once 'Library/External/Template.php';
 
     // Use library
     use Steampixel\Route;

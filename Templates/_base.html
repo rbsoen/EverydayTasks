@@ -20,7 +20,13 @@
 
     <main>
         {% yield content %}
-        <div id="additional-content"></div>
+        {% if (!empty($notifications)): %}
+        {% foreach($notifications as $notification): %}
+        <div class="notification notification--{{{ $notification['type'] }}}">
+            {{{ $notification['message'] }}}
+        </div>
+        {% endforeach; %}
+        {% endif; %}
     </main>
 
     <script src="/assets/vendor/bliss.min.js"></script>

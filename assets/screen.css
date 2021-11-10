@@ -67,6 +67,7 @@ body {
     background: var(--main-bg);
     color: var(--main-text);
     line-height: 1.8em;
+    overflow-y: scroll;
 }
 
 a {
@@ -235,6 +236,11 @@ main {
     text-align: center;
     font-size: 2.2em;
     font-weight: 400;
+    line-height: 1.2em;
+}
+
+.card__time h3 > span:nth-of-type(1){
+    font-size: .8em;
 }
 
 .card__details {
@@ -337,4 +343,79 @@ form select {
 
 form input:focus, form textarea:focus, form select:focus {
     box-shadow: 0 0 0 3px var(--orange);
+}
+
+.fullsize-form-container {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	z-index: 999;
+	background: rgba(0,0,0,.7);
+	animation: .5s form-fade-in alternate;
+}
+
+.fullsize-form-container-out {
+	animation: .5s form-fade-out;
+}
+
+.fullsize-form-container > form {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	width: min(100%, 50em);
+}
+
+.form-begin-animation {
+	animation: .5s form-fly-in;
+}
+
+@keyframes form-fade-in {
+  from {opacity: 0;}
+  to {opacity: 1;}
+}
+
+@keyframes form-fade-out {
+  from {opacity: 1;}
+  to {opacity: 0;}
+}
+
+@keyframes form-fly-in {
+  from { top: 48%; }
+  to {top: 50%;}
+}
+
+.notification {
+	position: fixed;
+	bottom: 0;
+	width: 100%;
+	left: 0;
+	background-color: var(--white);
+	padding: .5em;
+	text-align: center;
+	box-shadow: 0 -3px 25px rgba(0,0,0,.4);
+	animation: .5s notification-start;
+	font-weight:bold;
+    z-index: 9999;
+}
+
+.notification--animation-end {
+	animation: .5s notification-end;
+}
+
+.notification--success {
+	background-color: var(--green);
+	color: var(--white);
+}
+
+@keyframes notification-start {
+	from { bottom: -9em; }
+	to { bottom: 0; }
+}
+
+@keyframes notification-end {
+	from { bottom: 0; }
+	to { bottom: -9em; }
 }

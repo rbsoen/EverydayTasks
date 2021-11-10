@@ -8,8 +8,7 @@
     use EverydayTasks\Activity;
     use EverydayTasks\ResponseCode;
     use EverydayTasks\Idempotency;
-use phpDocumentor\Reflection\Types\Iterable_;
-use Steampixel\Route;
+    use Steampixel\Route;
 
     Route::clearRoutes();
 
@@ -30,6 +29,7 @@ use Steampixel\Route;
         // add link
         if (!empty($activity_array['category'])) {
             $activity_array['links']['category'] = [
+                'id' => $activity->getCategory()->getID(),
                 'href' => '/api/category/' . $activity->getCategory()->getID(),
                 'method' => 'GET'
             ];
@@ -115,7 +115,11 @@ use Steampixel\Route;
     {
         $activities = [];
 
-        $activity_query = Activity::getAll(Util::$db);
+        $activity_query = Activity::getCustom(
+            Util::$db,
+            '1=1 order by date_time desc',
+            []
+        );
 
         $get = Util::getParams();
 
