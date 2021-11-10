@@ -427,7 +427,7 @@ form input:focus, form textarea:focus, form select:focus {
 	background-color: rgba(0,0,0,.5);
 	width: 100%;
 	height: 100%;
-	position: absolute;
+	position: fixed;
 	top: 0;
 	left: 0;
     animation: var(--animation-length) form-fade-in;
@@ -435,7 +435,7 @@ form input:focus, form textarea:focus, form select:focus {
 
 .loading:before {
 	content: "";
-	position: absolute;
+	position: fixed;
 	top: 50%;
 	left: 50%;
 	transform: translate(-50%, -50%);
@@ -452,7 +452,7 @@ form input:focus, form textarea:focus, form select:focus {
 .loading:after {
 	content: "Loading";
 	transform: rotate(0deg);
-	position: absolute;
+	position: fixed;
 	top: 50%;
 	left: 50%;
 	transform: translate(-50%, 3em);
