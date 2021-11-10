@@ -411,6 +411,11 @@ form input:focus, form textarea:focus, form select:focus {
 	color: var(--white);
 }
 
+.notification--error {
+	background-color: var(--red);
+	color: var(--white);
+}
+
 @keyframes notification-start {
 	from { bottom: -9em; }
 	to { bottom: 0; }
