@@ -1,5 +1,4 @@
-;
-"use strict";
+;"use strict";
 
 /**
  * Force capitalize a string
@@ -52,6 +51,7 @@ Date.prototype.formatShortDate = function() {
 (function(d, w, $) {
     // set "global" (within this scope) variables
     let timeOuts = [];
+    let ajax_requests = [];
     let last_page = "";
 
     // add scripting part
@@ -62,6 +62,20 @@ Date.prototype.formatShortDate = function() {
             }
         )
     );
+
+    /**
+     * Wrapper around $.fetch, in order to allow it to be aborted
+     * from abortAllRequests()
+     * @param {string} target       The URL to fetch
+     * @param {object} options      Fetch options
+     * @param {function} then_func  Function to be run if succeeded
+     * @param {function} catch_func Function to be run if failed
+     */
+    function addRequest(target, options, then_func, catch_func){
+        var ajax = $.fetch(target, options);
+        ajax_requests.push(ajax);
+        ajax.then(then_func).catch(catch_func);
+    }
 
     /**
      * Create an activity card with subject, description and actions
@@ -105,34 +119,39 @@ Date.prototype.formatShortDate = function() {
         // add category if available
         if (activity.links.category instanceof Object) {
             // get category data
-            $.fetch(activity.links.category.href, {
-                method: "get",
-                responseType: "json"
-            }).then(function(cat_req) {
-                // add category upon successfully loading its data
-                category = cat_req.response;
+            addRequest(
+                activity.links.category.href,
+                {
+                    method: "get",
+                    responseType: "json"
+                },
+                function(cat_req) {
+                    // add category upon successfully loading its data
+                    category = cat_req.response;
 
-                // hidden text
-                new_card_title.appendChild($.create(
-                    "span", {
-                        className: "hidden",
-                        textContent: ", categorized in"
-                    }
-                ));
-
-                // card badge
-                new_card_title.appendChild(
-                    $.create(
+                    // hidden text
+                    new_card_title.appendChild($.create(
                         "span", {
-                            className: "card__badge",
-                            textContent: category.title,
-                            style: {
-                                "--badge-color": "#" + category.color.toString(16)
-                            }
+                            className: "hidden",
+                            textContent: ", categorized in"
                         }
+                    ));
+
+                    // card badge
+                    new_card_title.appendChild(
+                        $.create(
+                            "span", {
+                                className: "card__badge",
+                                textContent: category.title,
+                                style: {
+                                    "--badge-color": "#" + category.color.toString(16)
+                                }
+                            }
+                        )
                     )
-                )
-            });
+                },
+                function(e){}
+            );
         }
 
         // make description
@@ -412,30 +431,34 @@ Date.prototype.formatShortDate = function() {
 
         // add categories to the selection
         let categories = edit_form.querySelector("#category");
+        addRequest(
+            "/api/category",
+            {
+                method: "get",
+                responseType: "json"
+            },
+            function(cat_req) {
+                categories_list = cat_req.response;
+                for (let category of categories_list) {
+                    let cat_option = $.create(
+                        "option", {
+                            value: category.id,
+                            textContent: category.title
+                        }
+                    );
 
-        $.fetch("/api/category", {
-            method: "get",
-            responseType: "json"
-        }).then(function(cat_req) {
-            categories_list = cat_req.response;
-            for (let category of categories_list) {
-                let cat_option = $.create(
-                    "option", {
-                        value: category.id,
-                        textContent: category.title
-                    }
-                );
+                    // automatically select the activity's category
+                    try {
+                        if (activity.links.category.id == category.id)
+                            cat_option.selected = true
+                    } catch (e) {}
 
-                // automatically select the activity's category
-                try {
-                    if (activity.links.category.id == category.id)
-                        cat_option.selected = true
-                } catch (e) {}
-
-                // add categories to selection
-                categories.appendChild(cat_option);
-            }
-        })
+                    // add categories to selection
+                    categories.appendChild(cat_option);
+                }
+            },
+            function(e){}
+        );
 
         // Save changes
         let submit_button = edit_form.submit;
@@ -450,31 +473,36 @@ Date.prototype.formatShortDate = function() {
             edit_form_data = new FormData(edit_form);
 
             // custom submit event
-            $.fetch(activity.links.edit.href, {
-                method: activity.links.edit.method,
-                responseType: "json",
-                headers: {
-                    "Content-Type": "application/json"
+            addRequest(
+                activity.links.edit.href,
+                {
+                    method: activity.links.edit.method,
+                    responseType: "json",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    data: JSON.stringify({
+                        subject: edit_form_data.get("subject"),
+                        description: edit_form_data.get("description"),
+                        category: edit_form_data.get("category")
+                    })
                 },
-                data: JSON.stringify({
-                    subject: edit_form_data.get("subject"),
-                    description: edit_form_data.get("description"),
-                    category: edit_form_data.get("category")
-                })
-            }).then(function(e) {
-                pushNotification({
-                    type: "success",
-                    message: "Activity edited successfully!"
-                });
-                // refresh all activities
-                loadPage(last_page, true);
-                closeForm();
-            }).catch(function(e) {
-                pushNotification({
-                    type: "error",
-                    message: "Can't edit activity, try again later."
-                });
-            })
+                function(e) {
+                    pushNotification({
+                        type: "success",
+                        message: "Activity edited successfully!"
+                    });
+                    // refresh all activities
+                    loadPage(last_page, true);
+                    closeForm();
+                },
+                function(e) {
+                    pushNotification({
+                        type: "error",
+                        message: "Can't edit activity, try again later."
+                    });
+                }
+            );
 
             pushNotification({
                 type: "normal",
@@ -564,26 +592,31 @@ Date.prototype.formatShortDate = function() {
             });
 
             // Perform deletion
-            $.fetch(activity.links.delete.href, {
-                method: activity.links.delete.method,
-                responseType: "json",
-                headers: {
-                    "Content-Type": "application/json"
+            addRequest(
+                activity.links.delete.href,
+                {
+                    method: activity.links.delete.method,
+                    responseType: "json",
+                    headers: {
+                        "Content-Type": "application/json"
+                    }
+                },
+                function(e) {
+                    pushNotification({
+                        type: "success",
+                        message: "Activity deleted successfully!"
+                    });
+                    // refresh all activities
+                    loadPage(last_page, true);
+                    closeForm();
+                },
+                function(e) {
+                    pushNotification({
+                        type: "error",
+                        message: "Can't delete activity, try again later."
+                    });
                 }
-            }).then(function(e) {
-                pushNotification({
-                    type: "success",
-                    message: "Activity deleted successfully!"
-                });
-                // refresh all activities
-                loadPage(last_page, true);
-                closeForm();
-            }).catch(function(e) {
-                pushNotification({
-                    type: "error",
-                    message: "Can't delete activity, try again later."
-                });
-            });
+            );
 
             // make request
             pushNotification({
@@ -604,6 +637,25 @@ Date.prototype.formatShortDate = function() {
 
 
     /**
+     * Abort all pending AJAX requests
+     */
+    function abortAllRequests(){
+        for (ajax of ajax_requests) {
+            ajax.xhr.abort()
+        }
+    }
+
+    /**
+     * Abort all pending animation actions
+     */
+    function abortAllTimeouts(){
+        var timeout;
+        while (timeout = timeOuts.pop()) {
+            clearTimeout(timeout);
+        }
+    }
+
+    /**
      * Loads a page depending on the URL.
      * @param page_name
      * @param push_to_history Bool
@@ -616,46 +668,57 @@ Date.prototype.formatShortDate = function() {
         if (push_to_history)
             history.pushState({}, '', page_name);
 
+        abortAllTimeouts();
+        abortAllRequests();
+
         let activities, req;
         let special_case = null;
 
         // special cases: load edit page
         if (special_case = /\/activity\/([0-9a-f]{8})\/edit\/?$/.exec(page_name)) {
             addLoadingScreen();
-            $.fetch(`/api/activity/${special_case[1]}`, {
-                method: "get",
-                responseType: "json"
-            }).then(function(e) {
-                let activity = e.response;
-                $('#extra').appendChild(createEditForm(activity));
-                removeLoadingScreen();
-            }).catch(function(e) {
-                pushNotification({
-                    type: "error",
-                    message: "Failed to load activity for editing"
-                });
-            })
-            console.log("Edit page invoked");
+            addRequest(
+                `/api/activity/${special_case[1]}`,
+                {
+                    method: "get",
+                    responseType: "json"
+                },
+                function(e) {
+                    let activity = e.response;
+                    $('#extra').appendChild(createEditForm(activity));
+                    removeLoadingScreen();
+                },
+                function(e) {
+                    pushNotification({
+                        type: "error",
+                        message: "Failed to load activity for editing"
+                    });
+                }
+            );
             return;
         }
 
         // special cases: load delete page
         if (special_case = /\/activity\/([0-9a-f]{8})\/delete\/?$/.exec(page_name)) {
             addLoadingScreen();
-            $.fetch(`/api/activity/${special_case[1]}`, {
-                method: "get",
-                responseType: "json"
-            }).then(function(e) {
-                let activity = e.response;
-                $('#extra').appendChild(createDeleteForm(activity));
-                removeLoadingScreen();
-            }).catch(function(e) {
-                pushNotification({
-                    type: "error",
-                    message: "Failed to load activity for deleting"
-                });
-            });
-            console.log("Delete page invoked");
+            addRequest(
+                `/api/activity/${special_case[1]}`,
+                {
+                    method: "get",
+                    responseType: "json"
+                },
+                function(e) {
+                    let activity = e.response;
+                    $('#extra').appendChild(createDeleteForm(activity));
+                    removeLoadingScreen();
+                },
+                function(e) {
+                    pushNotification({
+                        type: "error",
+                        message: "Failed to load activity for deleting"
+                    });
+                }
+            );
             return;
         }
 
@@ -670,109 +733,111 @@ Date.prototype.formatShortDate = function() {
             case "/activity/":
                 clearWholePage();
                 addLoadingScreen();
-                $.fetch("/api/activity/?for=today", {
-                    method: "get",
-                    responseType: "json"
-                }).then(function(e) {
-                    activities = e.response;
-                    // clear existing timeouts (prevent duplicate card bug)
-                    var timeout;
-                    while (timeout = timeOuts.pop()) {
-                        clearTimeout(timeout);
+                addRequest(
+                    "/api/activity/?for=today",
+                    {
+                        method: "get",
+                        responseType: "json"
+                    },
+                    function(e) {
+                        activities = e.response;
+
+                        // load content for the "all activities" page
+                        clearWholePage();
+
+                        let date = new Date();
+
+                        // header
+                        $('main').appendChild(
+                            $.create(
+                                "header", {
+                                    className: "activity-heading",
+                                    contents: [{
+                                            tag: "h2",
+                                            textContent: `Today's Activities (${date.formatDate()})`
+                                        },
+                                        {
+                                            tag: "a",
+                                            id: "add",
+                                            textContent: "Add",
+                                            href: "add",
+                                            className: "button button--add"
+                                        }
+                                    ]
+                                }
+                            )
+                        );
+
+                        // show all activities link
+                        let all_activities_link =
+                            $.create("a", {
+                                id: "view-all-activities",
+                                textContent: "View all activities",
+                                href: "all"
+                            });
+                        $('main').appendChild(all_activities_link);
+
+                        addMainPageHandlers();
+
+                        // activities
+                        fadeActivitiesIn(activities);
+                    },
+                    function(e) {
+                        console.log(e.status)
                     }
-
-                    // load content for the "all activities" page
-                    clearWholePage();
-
-                    let date = new Date();
-
-                    // header
-                    $('main').appendChild(
-                        $.create(
-                            "header", {
-                                className: "activity-heading",
-                                contents: [{
-                                        tag: "h2",
-                                        textContent: `Today's Activities (${date.formatDate()})`
-                                    },
-                                    {
-                                        tag: "a",
-                                        id: "add",
-                                        textContent: "Add",
-                                        href: "add",
-                                        className: "button button--add"
-                                    }
-                                ]
-                            }
-                        )
-                    );
-
-                    // show all activities link
-                    let all_activities_link =
-                        $.create("a", {
-                            id: "view-all-activities",
-                            textContent: "View all activities",
-                            href: "all"
-                        });
-                    $('main').appendChild(all_activities_link);
-
-                    addMainPageHandlers();
-
-                    // activities
-                    fadeActivitiesIn(activities);
-                }).catch(function(e) {
-                    console.log(e.status)
-                })
+                );
                 break;
 
             case "/activity/all":
                 clearWholePage();
                 addLoadingScreen();
-                // ensure loading activities first
-                $.fetch("/api/activity/", {
-                    method: "get",
-                    responseType: "json"
-                }).then(function(e) {
-                    activities = e.response;
-                    // clear existing timeouts (prevent duplicate card bug)
-                    var timeout;
-                    while (timeout = timeOuts.pop()) {
-                        clearTimeout(timeout);
+                addRequest(
+                    "/api/activity/",
+                    {
+                        method: "get",
+                        responseType: "json"
+                    },
+                    function(e) {
+                        activities = e.response;
+
+                        // load content for the "all activities" page
+                        clearWholePage();
+
+                        // header
+                        $('main').appendChild(
+                            $.create(
+                                "header", {
+                                    className: "activity-heading",
+                                    contents: [{
+                                            tag: "h2",
+                                            textContent: "All Activities"
+                                        },
+                                        {
+                                            tag: "a",
+                                            id: "add",
+                                            textContent: "Add",
+                                            href: "add",
+                                            className: "button button--add"
+                                        }
+                                    ]
+                                }
+                            )
+                        );
+
+                        addCommonHandlers();
+
+                        // activities
+                        fadeActivitiesIn(activities);
+                    },
+                    function(e) {
+                        console.log(e.status)
                     }
-
-                    // load content for the "all activities" page
-                    clearWholePage();
-
-                    // header
-                    $('main').appendChild(
-                        $.create(
-                            "header", {
-                                className: "activity-heading",
-                                contents: [{
-                                        tag: "h2",
-                                        textContent: "All Activities"
-                                    },
-                                    {
-                                        tag: "a",
-                                        id: "add",
-                                        textContent: "Add",
-                                        href: "add",
-                                        className: "button button--add"
-                                    }
-                                ]
-                            }
-                        )
-                    );
-
-                    addCommonHandlers();
-
-                    // activities
-                    fadeActivitiesIn(activities);
-                }).catch(function(e) {
-                    console.log(e.status)
-                })
+                );
                 break;
             default:
+                // go to the static page if there is no dynamic equivalent
+                // TODO: going back by browser method is not possible
+                w.location.href = page_name;
                 break;
         }
     }
@@ -806,6 +871,24 @@ Date.prototype.formatShortDate = function() {
      * Add handlers for card buttons
      */
     function addCommonHandlers() {
+        // enhance page navigation
+        // get #main-menu -> ul -> li
+        let menu_nav = d.getElementById("main-menu").firstElementChild.firstElementChild;
+        do {
+            // iterate over all menu links
+            let current_link = menu_nav.firstElementChild;
+            current_link.addEventListener("click", function(e){
+                e.preventDefault();
+
+                // remove base URL from the menu link
+                loadPage(
+                    current_link.href.replace(
+                        /https?:\/\/[a-z\-_]+\.[a-z]+\//,
+                        '/'
+                    ), true);
+            })
+        } while (menu_nav = menu_nav.nextElementSibling);
+
         // enhance Add button
         let add_activity_button = d.getElementById("add");
         if (add_activity_button instanceof Node) {
