@@ -202,14 +202,11 @@ main {
     flex-direction: row;
     transition: .3s transform;
     transform: perspective(800px) translateZ(0);
+    animation: var(--animation-length) card-in;
 }
 
 .card:hover {
     transform: perspective(800px) translateZ(3em);
-}
-
-.card--start-animation {
-    animation: var(--animation-length) card-in;
 }
 
 @keyframes card-in {

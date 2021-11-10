@@ -72,7 +72,7 @@ Date.prototype.formatShortDate = function() {
         // initialize card, first element contains time
         let new_card = $.create(
             "section", {
-                className: "card card--start-animation",
+                className: "card",
                 contents: [{
                     tag: "div",
                     className: "card__time",
