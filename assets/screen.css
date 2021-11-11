@@ -69,6 +69,8 @@ body {
     color: var(--main-text);
     line-height: 1.8em;
     overflow-y: scroll;
+    overflow-x: hidden;
+    width: 100%;
 }
 
 a {
@@ -128,6 +130,21 @@ h1 a {
 main {
     margin-top: var(--top-bar-height);
     padding: 2em var(--side-padding);
+    animation: var(--animation-length) screen-in;
+}
+
+.main--fade-out {
+    animation: var(--animation-length) screen-out;
+}
+
+@keyframes screen-out {
+    from {transform: translateY(0); opacity: 1;}
+    to {transform: translateY(-1em); opacity: 0;}
+}
+
+@keyframes screen-in {
+    from {transform: translateY(1em); opacity: 0;}
+    to {transform: translateY(0); opacity: 1;}
 }
 
 .activity-heading {

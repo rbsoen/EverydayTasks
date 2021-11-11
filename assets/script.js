@@ -171,7 +171,7 @@ Date.prototype.getTimeString = function() {
                 },
                 function(cat_req) {
                     // add category upon successfully loading its data
-                    category = cat_req.response;
+                    let category = cat_req.response;
 
                     // hidden text
                     new_card_title.appendChild($.create(
@@ -262,7 +262,7 @@ Date.prototype.getTimeString = function() {
      * Drawbacks:
      * @param activities An array of activity objects
      */
-     function fadeActivitiesIn(activities) {
+    function fadeActivitiesIn(activities) {
         let activity_delay = 0;
         for (const activity of activities) {
             activity_delay += 1;
@@ -297,11 +297,14 @@ Date.prototype.getTimeString = function() {
     /**
      * Delete everything in the page
      */
-    function clearWholePage() {
-        while (true) {
-            try { $("main").firstElementChild.remove() }
-            catch (e) { break; }
-        }
+    function clearWholePage(callback, ...args) {
+        removeLoadingScreen();
+        let main_ = $("main");
+        main_.addEventListener("animationend", function(){
+            main_.parentElement.replaceChild($.create("main"), main_);
+            callback.apply(args);
+        });
+        main_.classList.add("main--fade-out");
     }
 
     /**
@@ -366,9 +369,33 @@ Date.prototype.getTimeString = function() {
         $('#extra').appendChild(new_notification)
     };
 
+    function createActivityPageHeader(title){
+        // header
+        $('main').appendChild(
+            $.create(
+                "header", {
+                    className: "activity-heading",
+                    contents: [{
+                        tag: "h2",
+                        textContent: title
+                    },
+                        {
+                            tag: "a",
+                            id: "add",
+                            textContent: "Add",
+                            href: "add",
+                            className: "button button--add",
+                            attributes: {"data-link": ""}
+                        }
+                    ]
+                }
+            )
+        );
+    }
+
     /**
      * Show the edit or new form for an activity
-     * @param activity|null Activity to edit, or for new activities, null.
+     * @param {activity|null} activity Activity to edit, or for new activities, null.
      */
     function createEditForm(activity) {
         // close existing forms
@@ -489,7 +516,7 @@ Date.prototype.getTimeString = function() {
                 responseType: "json"
             },
             function(cat_req) {
-                categories_list = cat_req.response;
+                let categories_list = cat_req.response;
                 for (let category of categories_list) {
                     let cat_option = $.create(
                         "option", {
@@ -529,7 +556,7 @@ Date.prototype.getTimeString = function() {
             }
 
             // extract form data
-            edit_form_data = new FormData(edit_form);
+            let edit_form_data = new FormData(edit_form);
 
             // custom submit event
             addRequest(
@@ -705,8 +732,8 @@ Date.prototype.getTimeString = function() {
 
     /**
      * Loads a page depending on the URL.
-     * @param page_name
-     * @param push_to_history Bool
+     * @param {String} page_name
+     * @param {boolean} push_to_history
      */
     function doRoute(page_name, push_to_history) {
         // only keep track of last page if it is different
@@ -714,7 +741,7 @@ Date.prototype.getTimeString = function() {
             last_page = location.pathname;
 
         if (push_to_history)
-            history.pushState({}, '', page_name);
+            history.pushState(null, null, page_name);
 
         abortAllTimeouts();
         abortAllRequests();
@@ -787,50 +814,26 @@ Date.prototype.getTimeString = function() {
                         responseType: "json"
                     },
                     function(e) {
-                        activities = e.response;
-
                         // load content for the "all activities" page
-                        clearWholePage();
-
-                        let date = new Date();
-
-                        // header
-                        $('main').appendChild(
-                            $.create(
-                                "header", {
-                                    className: "activity-heading",
-                                    contents: [{
-                                            tag: "h2",
-                                            textContent: `Today's Activities (${date.formatDate()})`
-                                        },
-                                        {
-                                            tag: "a",
-                                            id: "add",
-                                            textContent: "Add",
-                                            href: "add",
-                                            className: "button button--add"
-                                        }
-                                    ]
-                                }
-                            )
-                        );
-
-                        // show all activities link
-                        let all_activities_link =
-                            $.create("a", {
-                                id: "view-all-activities",
-                                textContent: "View all activities",
-                                href: "all"
-                            });
-                        $('main').appendChild(all_activities_link);
-
-                        addMainPageHandlers();
-
-                        // activities
-                        fadeActivitiesIn(activities);
+                        clearWholePage(function(e){
+                            activities = this[0].response;
+                            let date = new Date();
+                            createActivityPageHeader(`Today's Activities (${date.formatDate()})`);
+                            // show all activities link
+                            let all_activities_link =
+                                $.create("a", {
+                                    id: "view-all-activities",
+                                    textContent: "View all activities",
+                                    href: "all",
+                                    attributes: {"data-link": ""}
+                                });
+                            $('main').appendChild(all_activities_link);
+                            addCommonHandlers();
+                            fadeActivitiesIn(activities);
+                        }, e);
                     },
                     function(e) {
-                        console.log(e.status)
+                        console.error(e);
                     }
                 );
                 break;
@@ -844,39 +847,16 @@ Date.prototype.getTimeString = function() {
                         responseType: "json"
                     },
                     function(e) {
-                        activities = e.response;
-
                         // load content for the "all activities" page
-                        clearWholePage();
-
-                        // header
-                        $('main').appendChild(
-                            $.create(
-                                "header", {
-                                    className: "activity-heading",
-                                    contents: [{
-                                            tag: "h2",
-                                            textContent: "All Activities"
-                                        },
-                                        {
-                                            tag: "a",
-                                            id: "add",
-                                            textContent: "Add",
-                                            href: "add",
-                                            className: "button button--add"
-                                        }
-                                    ]
-                                }
-                            )
-                        );
-
-                        addCommonHandlers();
-
-                        // activities
-                        fadeActivitiesIn(activities);
+                        clearWholePage(function(e){
+                            activities = this[0].response;
+                            createActivityPageHeader("All Activities");
+                            addCommonHandlers();
+                            fadeActivitiesIn(activities);
+                        }, e);
                     },
                     function(e) {
-                        console.log(e.status)
+                        console.error(e)
                     }
                 );
                 break;
@@ -895,82 +875,40 @@ Date.prototype.getTimeString = function() {
     })
 
     /**
-     * Add button handlers for the main page
-     */
-    function addMainPageHandlers() {
-        // Main page controls
-        addCommonHandlers();
-        let view_all_activities = d.getElementById("view-all-activities");
-        if (view_all_activities instanceof Node) {
-            Object.getPrototypeOf(view_all_activities).click_counter = 0
-            view_all_activities.addEventListener("click", function(e) {
-                e.preventDefault();
-                // prevent re-calling when link is clicked multiple times
-                if (this.click_counter > 0) return;
-                this.click_counter++;
-                doRoute("/activity/all", true);
-            })
-        }
-    };
-
-    /**
      * Add handlers for card buttons
      */
     function addCommonHandlers() {
         // enhance page navigation
-        // get #main-menu -> ul -> li
-        let menu_nav = d.getElementById("main-menu").firstElementChild.firstElementChild;
-        do {
-            // iterate over all menu links
-            let current_link = menu_nav.firstElementChild;
-            current_link.addEventListener("click", function(e){
-                e.preventDefault();
-
-                // remove base URL from the menu link
-                doRoute(
-                    current_link.href.replace(
-                        /https?:\/\/[a-z\-_]+\.[a-z]+\//,
-                        '/'
-                    ), true);
-            })
-        } while (menu_nav = menu_nav.nextElementSibling);
-
-        // enhance Add button
-        let add_activity_button = d.getElementById("add");
-        if (add_activity_button instanceof Node) {
-            add_activity_button.addEventListener("click", function(e) {
-                e.preventDefault();
-                doRoute("/activity/add", true);
-            })
-        }
-
-        // enhance actions in cards
+        // get all enabled links (links with the "data-link" attribute defined)
+        let enabled_links = d.querySelectorAll("[data-link]");
         for (
-            var edit_buttons = $.$("section.card .button--edit"), i = 0;
-            i < edit_buttons.length;
+            let i = 0,
+                num_links = enabled_links.length,
+                link;
+            i < num_links;
             i++
         ) {
-            let edit_button = edit_buttons[i]
-            edit_button.addEventListener("click", function(e) {
-                e.preventDefault();
-                doRoute(edit_button.href, true);
-            });
-        }
+            // for every link, attach a dynamic event listener
+            link = enabled_links[i];
 
-        for (
-            var
-                delete_buttons = $.$("section.card .button--delete"), i = 0;
-                i < delete_buttons.length;
-                i++
-        ) {
-            let delete_button = delete_buttons[i]
-            delete_button.addEventListener("click", function(e) {
-                e.preventDefault();
-                doRoute(delete_button.href, true);
+            // cheap way of removing all event listeners
+            let new_link = link.cloneNode(true)
+            link.parentNode.replaceChild(new_link, link);
+            console.log("Clearing event listeners");
+
+            new_link.addEventListener("click", function(e){
+               e.preventDefault();
+
+               doRoute(
+                   link.href.replace(/https?:\/\/[a-z\-_]+\.[a-z]+\//, '/'),
+                   true
+               );
             });
         }
     };
 
-    addMainPageHandlers();
+    addCommonHandlers();
+
+    console.log("Application active");
 
 })(document, window, Bliss);

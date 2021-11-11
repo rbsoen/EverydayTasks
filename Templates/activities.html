@@ -8,15 +8,15 @@
 <header class="activity-heading">
   {% if ($is_view_today): %}
     <h2>Today's Activities ({{{ $today->format("l, j F Y") }}})</h2>
-    <a href="add" class="button button--add" id="add">Add</a>
+    <a href="add" class="button button--add" id="add" data-link>Add</a>
   {% else: %}
     <h2>All Activities</h2>
-    <a href="add" class="button button--add" id="add">Add</a>
+    <a href="add" class="button button--add" id="add" data-link>Add</a>
   {% endif; %}
 </header>
 
 {% if ($is_view_today): %}
-<a href="all" id="view-all-activities">View all activities</a>
+<a href="all" id="view-all-activities" data-link>View all activities</a>
 {% endif; %}
 
 {% foreach ($activities as $activity): %}
@@ -42,8 +42,8 @@
       </div>
       <ul class="card__actions">
 <!--        <li><a href="{{{ $activity->getID() }}}" class="button button&#45;&#45;view">View</a></li>-->
-        <li><a href="{{{ $activity->getID() }}}/edit" class="button button--edit">Edit</a></li>
-        <li><a href="{{{ $activity->getID() }}}/delete" class="button button--delete">Delete</a></li>
+        <li><a href="{{{ $activity->getID() }}}/edit" class="button button--edit" data-link>Edit</a></li>
+        <li><a href="{{{ $activity->getID() }}}/delete" class="button button--delete" data-link>Delete</a></li>
       </ul>
     </div>
   </section>
