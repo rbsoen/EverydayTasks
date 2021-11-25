@@ -16,3 +16,15 @@ create table activities (
     primary key (id),
     foreign key (category) references categories(id)
 );
+
+create table tasks (
+    id varchar(32),
+    subject text not null,
+    description text,
+    due datetime not null,
+    category varchar(32),
+    activity varchar(32),
+
+    primary key (id),
+    foreign key (category) references categories(id)
+);
