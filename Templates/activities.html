@@ -33,7 +33,7 @@
         <h4>{{{ $activity->getSubject() }}}
           {% if (!empty($activity->getCategory())): %}
           <span class="hidden">, categorized in</span>
-          <span class="card__badge" style="--badge-color: #{{{ sprintf('%06x', $activity->getCategory()->color) }}}">
+          <span class="card__badge" style="--badge-color: #{{{ str_pad(sprintf('%06x', $activity->getCategory()->color), 6, '0', STR_PAD_LEFT) }}}">
                   {{{ $activity->getCategory()->getTitle() }}}
                 </span>
           {% endif; %}
