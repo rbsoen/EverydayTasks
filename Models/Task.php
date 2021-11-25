@@ -157,7 +157,7 @@ class Task {
             'id' => $this->id,
             'subject' => $this->subject,
             'description' => $this->description,
-            'due' => $this->due->format('Y-m-d H:i:s'),
+            'due' => empty($this->due)? null : $this->due->format('Y-m-d H:i:s'),
             'category' =>
                 ($this->category instanceof Category)
                     ? $this->category->getID()
@@ -189,7 +189,7 @@ class Task {
                 $result['id'],
                 $result['subject'],
                 $result['description'],
-                DateTime::createFromFormat('Y-m-d H:i:s', $result['due']),
+                empty($result['due'])? null :DateTime::createFromFormat('Y-m-d H:i:s', $result['due']),
                 $category,
                 $activity
             );
@@ -205,7 +205,7 @@ class Task {
                 $result->id,
                 $result->subject,
                 $result->description,
-                DateTime::createFromFormat('Y-m-d H:i:s', $result->due),
+                empty($result->due)? null :DateTime::createFromFormat('Y-m-d H:i:s', $result->due),
                 $category,
                 $activity
             );

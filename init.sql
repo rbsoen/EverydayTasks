@@ -21,7 +21,7 @@ create table tasks (
     id varchar(32),
     subject text not null,
     description text,
-    due datetime not null,
+    due datetime,
     category varchar(32),
     activity varchar(32),
 
