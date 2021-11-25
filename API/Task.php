@@ -21,7 +21,7 @@ Route::clearRoutes();
 function convertTaskIntoAPIArray(Task $task): array
 {
     $activity_array = Util::convertIntoApiArray(
-        '/api/activity/' . $task->getID(),
+        '/api/task/' . $task->getID(),
         $task->toArray(),
         $task->getID(),
         'Task'
@@ -64,6 +64,7 @@ function returnTaskJson(Task $task)
  */
 function taskFromArray(array $array) {
     $category = null;
+    $description = "";
     $activity = null;
     $due = null;
 
@@ -75,6 +76,7 @@ function taskFromArray(array $array) {
         return;
     }
 
+
     // subject cannot be empty
     if (
         empty($array['subject'])
@@ -83,10 +85,14 @@ function taskFromArray(array $array) {
         return;
     }
 
+    if (key_exists("description", $array)) {
+        $description = $array["description"] = Util::sanitize($array["description"]);
+    }
+
     // due date and time is optional
     if (array_key_exists('due', $array)) {
         try {
-            $date_time = new DateTime($array['due']);
+            $due = new DateTime($array['due']);
         } catch (Exception) {
             http_response_code(ResponseCode::BAD_REQUEST);
             return;
@@ -110,7 +116,7 @@ function taskFromArray(array $array) {
         Util::$db,
         bin2hex(random_bytes(4)),
         Util::sanitize($array['subject']),
-        Util::sanitize($array['description']),
+        $description,
         $due,
         $category,
         $activity
@@ -133,7 +139,7 @@ Route::add('/', function()
 
     $task_query = Task::getCustom(
         Util::$db,
-        '1=1 order by date_time desc',
+        '1=1 order by due desc',
         []
     );
 
