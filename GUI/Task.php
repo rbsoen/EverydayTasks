@@ -44,85 +44,90 @@ use EverydayTasks\Util;
         ]);
     }, 'get');
 
-//    /*
-//     * Edit an activity
-//     */
-//    Route::add('/([0-9a-f]{8})/edit', function($id){
-//        $activity = Activity::searchById(Util::$db, $id);
-//        $category_list = Category::getAll(Util::$db);
-//
-//        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-//            // handle invalid activity
-//            if (empty($activity)) {
-//                Template::view('Templates/activities_edit.html', [
-//                    'page_title' => 'Activity edit',
-//                    'page_heading' => 'Edit Activity',
-//                    'activity' => $activity
-//                ]);
-//                return;
-//            }
-//
-//            // Apply changes
-//            $activity->setSubject($_POST['subject']);
-//            $activity->setDescription($_POST['description']);
-//            $category = Category::searchById(Util::$db, $_POST['category']);
-//            $activity->setCategory($category);
-//            if ($activity->replaceDatabaseEntry()){
-//                // redirect to main page
-//                header('Location: /activity/');
-//                return;
-//            }
-//            Template::view('Templates/activities_edit.html', [
-//                'page_title' => 'Activity edit',
-//                'page_heading' => 'Edit Activity',
-//                'activity' => $activity,
-//                'category_list' => $category_list,
-//                'notifications' => [
-//                    ['type'=>'error', 'message'=>'Could not edit activity, or activity already modified.']
-//                ]
-//            ]);
-//            return;
-//        }
-//
-//        // GET
-//        Template::view('Templates/activities_edit.html', [
-//            'page_title' => 'Activity edit',
-//            'page_heading' => 'Edit Activity',
-//            'activity' => $activity,
-//            'category_list' => $category_list
-//        ]);
-//    }, ['get', 'post']);
-//
-//    /*
-//     * Delete an activity
-//     */
-//    Route::add('/([0-9a-f]{8})/delete', function($id){
-//        $activity = Activity::searchById(Util::$db, $id);
-//
-//        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-//            if ($activity->deleteFromDatabase()) {
-//                header('Location: /activity/');
-//                return;
-//            }
-//
-//            Template::view('Templates/activities_delete.html', [
-//                'page_title' => 'Activity delete',
-//                'page_heading' => 'Delete Activity',
-//                'activity' => $activity,
-//                'notifications' => [
-//                    ['type'=>'error', 'message'=>'Could not delete activity']
-//                ]
-//            ]);
-//            return;
-//        }
-//
-//        // GET
-//        Template::view('Templates/activities_delete.html', [
-//            'page_title' => 'Activity delete',
-//            'page_heading' => 'Delete Activity',
-//            'activity' => $activity
-//        ]);
-//    }, ['get', 'post']);
+    /*
+     * Edit an activity
+     */
+    Route::add('/([0-9a-f]{8})/edit', function($id){
+        $task = Task::searchById(Util::$db, $id);
+        $category_list = Category::getAll(Util::$db);
+
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            // handle invalid activity
+            if (empty($task)) {
+                Template::view('Templates/tasks_edit.html', [
+                    'page_title' => 'Task edit',
+                    'page_heading' => 'Edit Task',
+                    'task' => $task
+                ]);
+                return;
+            }
+
+            // Apply changes
+            $task->setSubject($_POST['subject']);
+            $task->setDescription($_POST['description']);
+
+            if (!empty($_POST['due'])) {
+                $task->due = new DateTime($_POST['due']);
+            }
+
+            $category = Category::searchById(Util::$db, $_POST['category']);
+            $task->setCategory($category);
+            if ($task->replaceDatabaseEntry()){
+                // redirect to main page
+                header('Location: /task/');
+                return;
+            }
+            Template::view('Templates/tasks_edit.html', [
+                'page_title' => 'Task edit',
+                'page_heading' => 'Edit Task',
+                'task' => $task,
+                'category_list' => $category_list,
+                'notifications' => [
+                    ['type'=>'error', 'message'=>'Could not edit task, or task already modified.']
+                ]
+            ]);
+            return;
+        }
+
+        // GET
+        Template::view('Templates/tasks_edit.html', [
+            'page_title' => 'Task edit',
+            'page_heading' => 'Edit Task',
+            'task' => $task,
+            'category_list' => $category_list
+        ]);
+    }, ['get', 'post']);
+
+    /*
+     * Delete a task
+     */
+    Route::add('/([0-9a-f]{8})/delete', function($id){
+        $task = Task::searchById(Util::$db, $id);
+
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            if ($task->deleteFromDatabase()) {
+                header('Location: /task/');
+                return;
+            }
+
+            Template::view('Templates/activities_delete.html', [
+                'page_title' => 'Task delete',
+                'page_heading' => 'Delete Task',
+                'activity' => $task,
+                'notifications' => [
+                    ['type'=>'error', 'message'=>'Could not delete task']
+                ]
+            ]);
+            return;
+        }
+
+        // GET
+        Template::view('Templates/activities_delete.html', [
+            'page_title' => 'Task delete',
+            'page_heading' => 'Delete Task',
+            'activity' => $task
+        ]);
+    }, ['get', 'post']);
 
 /*
 * Add a task

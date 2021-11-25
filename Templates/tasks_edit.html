@@ -20,7 +20,11 @@
         <textarea id="description" name="description" rows="3">{{{ $task->getDescription() }}}</textarea>
         <br>
         <label for="due-date">Due at</label>
+        {% if (!empty($task->due)): %}
+        <input id="due-date" name="due" type="datetime-local" value="{{{ $task->due->format('Y-m-d\TH:i:s') }}}">
+        {% else: %}
         <input id="due-date" name="due" type="datetime-local">
+        {% endif; %}
         <label for="category">Category</label>
         <select name="category" id="category">
             <option value="">-- No category --</option>
