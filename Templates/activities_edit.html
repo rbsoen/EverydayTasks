@@ -21,8 +21,8 @@
         <br>
         <label for="category">Category</label>
         <select name="category" id="category">
-        {% foreach ( $category_list as $category ): %}
             <option value="">-- No category --</option>
+            {% foreach ( $category_list as $category ): %}
             <option value="{{{ $category->getID() }}}" {% if($activity->getCategory() == $category) echo "selected" %}>{{{ $category->getTitle() }}}</option>
         {% endforeach; %}
         </select>
