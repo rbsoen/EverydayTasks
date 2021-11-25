@@ -11,8 +11,8 @@
     require_once 'Library/Idempotency.php'; // idempotency feature
 
     // components
-    require_once 'Library/Activity.php';
-    require_once 'Library/Category.php';
+    require_once 'Models/Activity.php';
+    require_once 'Models/Category.php';
 
     // Routing and Templating
 	require_once 'Library/External/Route.php';
