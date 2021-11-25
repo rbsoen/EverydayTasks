@@ -32,4 +32,5 @@ require_once 'API/Task.php';
 
 // GUI
 require_once 'GUI/Activity.php';
+require_once 'GUI/Task.php';
 ?>
