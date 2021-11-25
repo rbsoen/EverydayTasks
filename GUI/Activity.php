@@ -1,13 +1,11 @@
 <?php
 
-    namespace EverydayTasks\API\Activity;
+    namespace EverydayTasks\GUI\Activity;
 
     use DateTime;
     use EverydayTasks\Category;
     use EverydayTasks\Util;
     use EverydayTasks\Activity;
-    use EverydayTasks\ResponseCode;
-    use EverydayTasks\Idempotency;
     use Steampixel\Route;
     use CodeShack\Template;
 
