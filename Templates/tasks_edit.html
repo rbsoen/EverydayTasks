@@ -1,0 +1,41 @@
+{% extends Templates/_base.html %}
+
+{% block title %}
+{{{ $page_title }}}
+{% endblock %}
+
+{% block content %}
+<header class="activity-heading">
+    <h2>{{{ $page_heading }}}</h2>
+</header>
+
+{% if (!empty($task)): %}
+<form method="post" id="edit-form">
+    <fieldset>
+        <legend>Task Details</legend>
+        <label for="subject">Subject</label>
+        <input type="text" id="subject" name="subject" value="{{{ $task->getSubject() }}}">
+        <br>
+        <label for="description">Description</label>
+        <textarea id="description" name="description" rows="3">{{{ $task->getDescription() }}}</textarea>
+        <br>
+        <label for="due-date">Due at</label>
+        <input id="due-date" name="due" type="datetime-local">
+        <label for="category">Category</label>
+        <select name="category" id="category">
+            <option value="">-- No category --</option>
+        {% foreach ( $category_list as $category ): %}
+            <option value="{{{ $category->getID() }}}" {% if($task->getCategory() == $category) echo "selected" %}>{{{ $category->getTitle() }}}</option>
+        {% endforeach; %}
+        </select>
+    </fieldset>
+    <fieldset class="hidden-and-submit">
+        <input type="hidden" name="anticsrf" value="MyACSRFValue">
+        <input type="submit" class="button button--edit">
+    </fieldset>
+</form>
+{% else: %}
+<p>Invalid activity ID.</p>
+{% endif; %}
+
+{% endblock %}
