@@ -22,11 +22,17 @@
 {% foreach ($tasks as $task): %}
   <section class="card">
     <div class="card__time">
+      {% if (!empty($task->due)): %}
       <h3>
-          <span>{{{ ltrim($task->due->format("d M"), "0") }}}</span>
-          <br>
-          <span>{{{ $task->due->format("H:i") }}}</span>
+        <span>{{{ ltrim($task->due->format("d M"), "0") }}}</span>
+        <br>
+        <span>{{{ $task->due->format("H:i") }}}</span>
       </h3>
+      {% else: %}
+      <h3>
+        <span>---</span>
+      </h3>
+      {% endif; %}
     </div>
     <div class="card__details">
       <div class="card__description">

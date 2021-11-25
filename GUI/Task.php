@@ -18,7 +18,7 @@ use EverydayTasks\Util;
     Route::add('/', function(){
         $tasks = Task::getCustom(
             Util::$db,
-            'activity is null',
+            'activity is null order by -due desc',
             []
         );
 
