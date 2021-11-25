@@ -3,7 +3,7 @@
 /**
  * Force capitalize a string
  * @example "helloWorld".capitalize() == "Helloworld"
- * @return string Capitalized word
+ * @return {string} Capitalized word
  */
 String.prototype.capitalize = function() {
     return (
@@ -16,7 +16,7 @@ String.prototype.capitalize = function() {
 /**
  * Formats the Date object into human-readable form.
  * @example new Date().formatDate() == "Tuesday, 9 November 2021"
- * @return string Formatted date
+ * @return {string} Formatted date
  */
 Date.prototype.formatDate = function() {
     let day_names = [
@@ -36,7 +36,7 @@ Date.prototype.formatDate = function() {
 /**
  * Gets the short date format
  * @example new Date().getShortMonth() == "9 Nov"
- * @return string Formatted date
+ * @return {string} Formatted date
  */
 Date.prototype.formatShortDate = function() {
     let month_names = [
@@ -51,11 +51,11 @@ Date.prototype.formatShortDate = function() {
 /**
  * Gets a standard time string
  * @example new Date().getTimeString() == "15:28"
- * @return string Formatted time
+ * @return {string} Formatted time
  */
 Date.prototype.getTimeString = function() {
-    var hours = this.getHours();
-    var minutes = this.getMinutes();
+    let hours = this.getHours();
+    let minutes = this.getMinutes();
 
     // add a zero to the hour as needed
     hours =
@@ -98,7 +98,7 @@ Date.prototype.getTimeString = function() {
      * @param {function} catch_func Function to be run if failed
      */
     function addRequest(target, options, then_func, catch_func){
-        var ajax = $.fetch(target, options);
+        const ajax = $.fetch(target, options);
         ajax_requests.push(ajax);
         ajax.then(then_func).catch(catch_func);
     }
@@ -107,6 +107,7 @@ Date.prototype.getTimeString = function() {
      * Abort all pending AJAX requests
      */
     function abortAllRequests(){
+        let ajax;
         for (ajax of ajax_requests) {
             ajax.xhr.abort()
         }
@@ -116,7 +117,7 @@ Date.prototype.getTimeString = function() {
      * Abort all pending timed actions
      */
     function abortAllTimeouts(){
-        var timeout;
+        let timeout;
         while (timeout = timeOuts.pop()) {
             clearTimeout(timeout);
         }
@@ -126,8 +127,8 @@ Date.prototype.getTimeString = function() {
 
     /**
      * Create an activity card with subject, description and actions
-     * @param activity Object
-     * @return {Node}
+     * @param {object} activity
+     * @return {Node} The generated activity card
      */
     function makeActivityCard(activity) {
         // initialize card, first element contains time
@@ -155,7 +156,7 @@ Date.prototype.getTimeString = function() {
             });
 
         // create card__description
-        var new_card_title = $.create(
+        const new_card_title = $.create(
             "h4",
             {textContent: activity.subject}
         );
@@ -259,8 +260,7 @@ Date.prototype.getTimeString = function() {
 
     /**
      * Create cards from Activity response, one-by-one.
-     * Drawbacks:
-     * @param activities An array of activity objects
+     * @param {Array<object>} activities An array of activity objects
      */
     function fadeActivitiesIn(activities) {
         let activity_delay = 0;
@@ -331,7 +331,7 @@ Date.prototype.getTimeString = function() {
      * Clear all notifications
      */
     function clearNotifications() {
-        var notification;
+        let notification;
         while (notification = $('.notification')) {
             notification.remove();
         }
@@ -339,10 +339,10 @@ Date.prototype.getTimeString = function() {
 
     /**
      * Show a notification
-     * @param notification Object with the following keys:
+     * @param {object} notification with the following keys:
      *  - type: "error", "success" or "normal"
      *  - message: "Notification message"
-     * @example popNotification({type: "success", message: "Action completed successfully"})
+     * @example pushNotification({type: "success", message: "Action completed successfully"})
      */
     function pushNotification(notification) {
         // delete all existing notifications first
@@ -369,6 +369,10 @@ Date.prototype.getTimeString = function() {
         $('#extra').appendChild(new_notification)
     };
 
+    /**
+     * Create a new header for Activity pages
+     * @param {string} title
+     */
     function createActivityPageHeader(title){
         // header
         $('main').appendChild(
@@ -617,7 +621,7 @@ Date.prototype.getTimeString = function() {
 
     /**
      * Show the delete form for an activity
-     * @param activity Activity
+     * @param {object} activity
      */
     function createDeleteForm(activity) {
         // close existing forms
@@ -750,7 +754,9 @@ Date.prototype.getTimeString = function() {
         let special_case = null;
 
         // special cases: load edit page
-        if (special_case = /\/activity\/([0-9a-f]{8})\/edit\/?$/.exec(page_name)) {
+        if (
+            special_case = /\/activity\/([0-9a-f]{8})\/edit\/?$/.exec(page_name)
+        ) {
             addLoadingScreen();
             addRequest(
                 `/api/activity/${special_case[1]}`,
@@ -774,7 +780,9 @@ Date.prototype.getTimeString = function() {
         }
 
         // special cases: load delete page
-        if (special_case = /\/activity\/([0-9a-f]{8})\/delete\/?$/.exec(page_name)) {
+        if (
+            special_case = /\/activity\/([0-9a-f]{8})\/delete\/?$/.exec(page_name)
+        ) {
             addLoadingScreen();
             addRequest(
                 `/api/activity/${special_case[1]}`,
