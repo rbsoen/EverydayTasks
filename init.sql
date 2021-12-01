@@ -31,6 +31,7 @@ create table tasks (
 
 create table projects (
     id varchar(32),
+    category varchar(32),
     subject text not null,
     description text,
     due datetime,
