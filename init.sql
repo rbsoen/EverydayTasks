@@ -28,3 +28,22 @@ create table tasks (
     primary key (id),
     foreign key (category) references categories(id)
 );
+
+create table projects (
+    id varchar(32),
+    subject text not null,
+    description text,
+    due datetime,
+
+    primary key (id)
+);
+
+-- Relation table between projects and tasks
+create table subprojects (
+    project varchar(32),
+    task varchar(32),
+    card_order float(24),
+
+    foreign key (project) references projects(id),
+    foreign key (task) references tasks(id)
+);
