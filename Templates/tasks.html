@@ -31,10 +31,10 @@
     <div class="card__details">
       <div class="card__description">
         <h4>{{{ $task->getSubject() }}}
-          {% if (!empty($task->getCategory())): %}
+          {% if (!empty($task->category)): %}
           <span class="hidden">, categorized in</span>
-          <span class="card__badge" style="--badge-color: #{{{ sprintf('%06x', $task->getCategory()->color) }}}">
-                  {{{ $task->getCategory()->getTitle() }}}
+          <span class="card__badge" style="--badge-color: #{{{ sprintf('%06x', $task->category->color) }}}">
+                  {{{ $task->category->getTitle() }}}
                 </span>
           {% endif; %}
         </h4>

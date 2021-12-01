@@ -10,8 +10,8 @@ class Task {
     private string $id;
     private string $subject;
     private string $description;
-    private ?Category $category = null;
-    private ?Activity $activity = null;
+    public ?Category $category = null;
+    public ?Activity $activity = null;
     public ?DateTime $due = null;
 
     /**
@@ -39,14 +39,10 @@ class Task {
     public function getSubject(): string { return $this->subject; }
     public function getDescription(): string { return $this->description; }
     public function getID(): string { return $this->id; }
-    public function getCategory(): Category|null { return $this->category; }
-    public function getActivity(): Activity|null { return $this->activity; }
 
     // setter functions with sanitizing
     public function setSubject(string $subject) { $this->subject = Util::sanitize($subject); }
     public function setDescription(string $description) { $this->description = Util::sanitize($description); }
-    public function setCategory(Category|null $category) { $this->category = $category; }
-    public function setActivity(Activity|null $activity) { $this->activity = $activity; }
 
     /**
      * Inserts the object to the actual database

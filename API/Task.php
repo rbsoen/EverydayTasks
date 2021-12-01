@@ -31,16 +31,16 @@ function convertTaskIntoAPIArray(Task $task): array
     // add link
     if (!empty($activity_array['category'])) {
         $activity_array['links']['category'] = [
-            'id' => $task->getCategory()->getID(),
-            'href' => '/api/category/' . $task->getCategory()->getID(),
+            'id' => $task->category->getID(),
+            'href' => '/api/category/' . $task->category->getID(),
             'method' => 'GET'
         ];
     }
 
     if (!empty($activity_array['activity'])) {
     $activity_array['links']['activity'] = [
-        'id' => $task->getActivity()->getID(),
-        'href' => '/api/activity/' . $task->getActivity()->getID(),
+        'id' => $task->activity->getID(),
+        'href' => '/api/activity/' . $task->activity->getID(),
         'method' => 'GET'
     ];
 }
@@ -234,14 +234,14 @@ Route::add('/([0-9a-f]+)', function($id)
     // update category
     if (isset($arguments->category)){
         $category = Category::searchById(Util::$db, $arguments->category);
-        $task->setCategory($category);
+        $task->category = $category;
         $changed = true;
     }
 
     // update activity
     if (isset($arguments->activity)){
         $activity = Activity::searchById(Util::$db, $arguments->activity);
-        $task->setActivity($activity);
+        $task->activity = $activity;
         $changed = true;
     }
 
