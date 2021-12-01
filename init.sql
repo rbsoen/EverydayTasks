@@ -35,7 +35,8 @@ create table projects (
     description text,
     due datetime,
 
-    primary key (id)
+    primary key (id),
+    foreign key (category) references categories(id)
 );
 
 -- Relation table between projects and tasks
