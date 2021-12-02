@@ -11,6 +11,7 @@
         private string $subject;
         private string $description;
         private ?Category $category = null;
+        private ?string $username = null;
         public DateTime $date_time;
 
         /**
@@ -21,13 +22,16 @@
          * @param DateTime $date_time When the activity was committed
          * @param Category|null $category The category to place the activity in
          */
-        public function __construct(PDO $db, string $id, string $subject, string $description, DateTime $date_time, Category|null $category=null)
-        {
+        public function __construct(
+            PDO $db, string $id, string $subject, string $description, DateTime $date_time,
+            Category|null $category=null, string|null $username=null
+        ){
             $this->db = $db;
             $this->id = $id;
             $this->subject = $subject;
             $this->description = $description;
             $this->date_time = $date_time;
+            $this->username = Util::sanitize($username);
             if ($category instanceof Category) $this->category = $category;
         }
 
@@ -36,6 +40,7 @@
         public function getDescription(): string { return $this->description; }
         public function getID(): string { return $this->id; }
         public function getCategory(): Category|null { return $this->category; }
+        public function getUsername(): string|null { return $this->username; }
 
         // setter functions with sanitizing
         public function setSubject(string $subject) { $this->subject = Util::sanitize($subject); }
@@ -46,8 +51,8 @@
          */
         public function addToDatabase(){
             $query = $this->db->prepare('
-                insert into activities(id, subject, description, date_time, category)
-                values (:id, :subject, :description, :date_time, :category);
+                insert into activities(id, subject, description, date_time, category, username)
+                values (:id, :subject, :description, :date_time, :category, :username);
             ');
             $query->execute($this->toArray());
         }
@@ -59,7 +64,8 @@
         public function replaceDatabaseEntry(): bool {
             $query = $this->db->prepare('
                 update activities
-                    set subject=:subject, description=:description, date_time=:date_time, category=:category
+                    set subject=:subject, description=:description, date_time=:date_time, category=:category,
+                        username=:username
                 where id = :id
             ');
             $query->execute($this->toArray());
@@ -153,7 +159,8 @@
                 'category' =>
                     ($this->category instanceof Category)
                         ? $this->category->getID()
-                        : null
+                        : null,
+                'username' => $this->username
             ];
         }
 
@@ -174,7 +181,8 @@
                     $result['subject'],
                     $result['description'],
                     DateTime::createFromFormat('Y-m-d H:i:s', $result['date_time']),
-                    $category
+                    $category,
+                    $result['username']
                 );
             } else {
                 $category = is_null($result->category)
@@ -186,7 +194,8 @@
                     $result->subject,
                     $result->description,
                     DateTime::createFromFormat('Y-m-d H:i:s', $result->date_time),
-                    $category
+                    $category,
+                    $result->username
                 );
             }
         }

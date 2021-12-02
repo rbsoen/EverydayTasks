@@ -18,8 +18,9 @@
         $today = new DateTime();
         $activities_today = Activity::getCustom(
             Util::$db,
-            'date(date_time) = ? order by date_time desc',
-            [$today->format('Y-m-d')]
+            'username=? and date(date_time) = ? order by date_time desc',
+            [Util::sanitize($_COOKIE['username']),
+                $today->format('Y-m-d')]
         );
 
         Template::view('Templates/activities.html', [
@@ -36,8 +37,8 @@
         $today = new DateTime();
         $activities = Activity::getCustom(
             Util::$db,
-            '1=1 order by date_time desc',
-            []
+            'username=? order by date_time desc',
+            [Util::sanitize($_COOKIE['username'])]
         );
 
         Template::view('Templates/activities.html', [

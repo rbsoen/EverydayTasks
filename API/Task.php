@@ -67,6 +67,7 @@ function taskFromArray(array $array) {
     $description = "";
     $activity = null;
     $due = null;
+    $username = null;
 
     // subject is required
     if (
@@ -111,6 +112,11 @@ function taskFromArray(array $array) {
         $activity = Activity::searchById(Util::$db, $array['activity']);
     }
 
+    // username is optional
+    if (array_key_exists('username', $array)) {
+        $username = $array['username'];
+    }
+
     // create activity and add it to the database
     $task = new Task(
         Util::$db,
@@ -119,7 +125,8 @@ function taskFromArray(array $array) {
         $description,
         $due,
         $category,
-        $activity
+        $activity,
+        $username
     );
 
     $task->addToDatabase();

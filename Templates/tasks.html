@@ -7,10 +7,10 @@
 {% block content %}
 <header class="activity-heading">
   {% if ($is_view_today): %}
-    <h2>Tasks Left to Do</h2>
+    <h2>Tasks Left to Do for {{{ $_COOKIE['username'] }}}</h2>
     <a href="add" class="button button--add" id="add" data-link>Add</a>
   {% else: %}
-    <h2>All Tasks</h2>
+    <h2>All Tasks for {{{ $_COOKIE['username'] }}}</h2>
     <a href="add" class="button button--add" id="add" data-link>Add</a>
   {% endif; %}
 </header>

@@ -2,6 +2,16 @@
 // Only for debugging
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
+session_start();
+
+function check_cookie() {
+    if (!array_key_exists('username', $_COOKIE)) {
+        setcookie('username', '-');
+        header('Location: /');
+        die();
+    }
+}
+
 
 // configuration
 require_once 'config.php';
@@ -30,7 +40,10 @@ require_once 'API/Activity.php';
 require_once 'API/Category.php';
 require_once 'API/Task.php';
 
+check_cookie();
+
 // GUI
 require_once 'GUI/Activity.php';
 require_once 'GUI/Task.php';
+require_once 'GUI/Intro.php';
 ?>

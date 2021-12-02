@@ -12,6 +12,7 @@ create table activities (
     description text,
     date_time datetime not null,
     category varchar(32),
+    username varchar(64),
 
     primary key (id),
     foreign key (category) references categories(id)
@@ -24,6 +25,7 @@ create table tasks (
     due datetime not null,
     category varchar(32),
     activity varchar(32),
+    username varchar(64),
 
     primary key (id),
     foreign key (category) references categories(id)

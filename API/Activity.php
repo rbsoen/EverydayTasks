@@ -54,6 +54,7 @@
      */
     function activityFromArray(array $array) {
         $category = null;
+        $username = null;
 
         // subject and description is required
         if (
@@ -89,6 +90,11 @@
             $category = Category::searchById(Util::$db, $array['category']);
         }
 
+        // username is optional
+        if (array_key_exists('username', $array)) {
+            $username = $array['username'];
+        }
+
         // create activity and add it to the database
         $activity = new Activity(
             Util::$db,
@@ -96,7 +102,8 @@
             Util::sanitize($array['subject']),
             Util::sanitize($array['description']),
             $date_time,
-            $category
+            $category,
+            $username
         );
 
         $activity->addToDatabase();
@@ -135,6 +142,14 @@
                 default:
                     break;
             }
+        }
+
+        if (array_key_exists('username', $get)) {
+            $activity_query = Activity::getCustom(
+                Util::$db,
+                'username=?',
+                [Util::sanitize($get['username'])]
+            );
         }
 
         foreach ($activity_query as $activity) {

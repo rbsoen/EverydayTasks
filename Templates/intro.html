@@ -1,0 +1,23 @@
+{% extends Templates/_base.html %}
+
+{% block title %}
+Introduce Yourself
+{% endblock %}
+
+{% block content %}
+<header class="activity-heading">
+    <h2>Introduce yourself</h2>
+</header>
+
+<p>Enter your name here:</p>
+
+<form method="post" id="edit-form">
+    <fieldset>
+        <label for="username">Your name</label>
+        <input name="username" id="username" required>
+    </fieldset>
+    <fieldset class="hidden-and-submit">
+        <input type="submit" class="button button--edit">
+    </fieldset>
+</form>
+{% endblock %}

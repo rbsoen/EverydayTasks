@@ -12,6 +12,7 @@ class Task {
     private string $description;
     public ?Category $category = null;
     public ?Activity $activity = null;
+    private ?string $username = null;
     public ?DateTime $due = null;
 
     /**
@@ -22,10 +23,13 @@ class Task {
      * @param DateTime|null $due
      * @param Category|null $category The category to place the task in
      * @param Activity|null $activity The associated activity
+     * @param string|null $username
      */
-    public function __construct(PDO $db, string $id, string $subject, string $description,
-                                DateTime|null $due, Category|null $category=null, Activity|null $activity=null)
-    {
+    public function __construct(
+        PDO $db, string $id, string $subject, string $description,
+        DateTime|null $due, Category|null $category=null, Activity|null $activity=null,
+        string|null $username=null
+    ){
         $this->db = $db;
         $this->id = $id;
         $this->subject = $subject;
@@ -33,12 +37,14 @@ class Task {
         if ($due instanceof DateTime) $this->due = $due;
         if ($category instanceof Category) $this->category = $category;
         if ($activity instanceof Activity) $this->activity = $activity;
+        $this->username = Util::sanitize($username);
     }
 
     // generic getter functions
     public function getSubject(): string { return $this->subject; }
     public function getDescription(): string { return $this->description; }
     public function getID(): string { return $this->id; }
+    public function getUsername(): string|null { return $this->username; }
 
     // setter functions with sanitizing
     public function setSubject(string $subject) { $this->subject = Util::sanitize($subject); }
@@ -49,8 +55,8 @@ class Task {
      */
     public function addToDatabase(){
         $query = $this->db->prepare('
-                insert into tasks(id, subject, description, due, category, activity)
-                values (:id, :subject, :description, :due, :category, :activity);
+                insert into tasks(id, subject, description, due, category, activity, username)
+                values (:id, :subject, :description, :due, :category, :activity, :username);
             ');
         $query->execute($this->toArray());
     }
@@ -63,7 +69,7 @@ class Task {
         $query = $this->db->prepare('
                 update tasks
                     set subject=:subject, description=:description, due=:due,
-                        category=:category, activity=:activity
+                        category=:category, activity=:activity, username=:username
                 where id = :id
             ');
         $query->execute($this->toArray());
@@ -161,7 +167,8 @@ class Task {
             'activity' =>
                 ($this->activity instanceof Activity)
                     ? $this->activity->getID()
-                    : null
+                    : null,
+            'username' => $this->username
         ];
     }
 
@@ -187,7 +194,8 @@ class Task {
                 $result['description'],
                 DateTime::createFromFormat('Y-m-d H:i:s', $result['due']),
                 $category,
-                $activity
+                $activity,
+                $result['username']
             );
         } else {
             $category = is_null($result->category)
@@ -203,7 +211,8 @@ class Task {
                 $result->description,
                 DateTime::createFromFormat('Y-m-d H:i:s', $result->due),
                 $category,
-                $activity
+                $activity,
+                $result['username']
             );
         }
     }
