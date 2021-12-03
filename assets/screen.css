@@ -190,7 +190,7 @@ main {
     color: var(--button-menu-text);
 }
 
-.button--view {
+.button--view, .button--finish {
     --shadow-color: rgba(6, 89, 239, 0.6);
     background: var(--blue);
     color: var(--white);

@@ -18,8 +18,8 @@ use EverydayTasks\Util;
     Route::add('/', function(){
         $tasks = Task::getCustom(
             Util::$db,
-            'activity is null',
-            []
+            'activity is null and username=? order by -due desc',
+            [Util::sanitize($_COOKIE['username'])]
         );
 
         Template::view('Templates/tasks.html', [
@@ -34,8 +34,8 @@ use EverydayTasks\Util;
     Route::add('/all', function(){
         $tasks = Task::getCustom(
             Util::$db,
-            '1=1 order by due desc',
-            []
+            'username=? order by -due desc',
+            [Util::sanitize($_COOKIE['username'])]
         );
 
         Template::view('Templates/tasks.html', [

@@ -159,7 +159,7 @@ class Task {
             'id' => $this->id,
             'subject' => $this->subject,
             'description' => $this->description,
-            'due' => $this->due->format('Y-m-d H:i:s'),
+            'due' => empty($this->due)? null : $this->due->format('Y-m-d H:i:s'),
             'category' =>
                 ($this->category instanceof Category)
                     ? $this->category->getID()
@@ -178,42 +178,24 @@ class Task {
      * @param mixed $result Fetch result
      * @return Task
      */
-    public static function toTask(PDO $db, array|object $result): Task
+    public static function toTask(PDO $db, array $result): Task
     {
-        if (gettype($result) == 'array') {
-            $category = is_null($result['category'])
-                ? null
-                : Category::searchById($db, $result['category']);
-            $activity = is_null($result['activity'])
-                ? null
-                : Activity::searchById($db, $result['activity']);
-            return new Task(
-                $db,
-                $result['id'],
-                $result['subject'],
-                $result['description'],
-                DateTime::createFromFormat('Y-m-d H:i:s', $result['due']),
-                $category,
-                $activity,
-                $result['username']
-            );
-        } else {
-            $category = is_null($result->category)
-                ? null
-                : Category::searchById($db, $result->category);
-            $activity = is_null($result->activity)
-                ? null
-                : Activity::searchById($db, $result->activity);
-            return new Task(
-                $db,
-                $result->id,
-                $result->subject,
-                $result->description,
-                DateTime::createFromFormat('Y-m-d H:i:s', $result->due),
-                $category,
-                $activity,
-                $result['username']
-            );
-        }
+        $category = is_null($result['category'])
+            ? null
+            : Category::searchById($db, $result['category']);
+        $activity = is_null($result['activity'])
+            ? null
+            : Activity::searchById($db, $result['activity']);
+        $due = empty($result['due'])? null : DateTime::createFromFormat('Y-m-d H:i:s', $result['due']);
+        return new Task(
+            $db,
+            $result['id'],
+            $result['subject'],
+            $result['description'],
+            $due,
+            $category,
+            $activity,
+            $result['username']
+        );
     }
 }

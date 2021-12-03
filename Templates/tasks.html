@@ -22,11 +22,17 @@
 {% foreach ($tasks as $task): %}
   <section class="card">
     <div class="card__time">
+      {% if (empty($task->due)): %}
       <h3>
-          <span>{{{ ltrim($task->due->format("d M"), "0") }}}</span>
-          <br>
-          <span>{{{ $task->due->format("H:i") }}}</span>
+        <span>-- : --</span>
       </h3>
+      {% else: %}
+      <h3>
+        <span>{{{ ltrim($task->due->format("d M"), "0") }}}</span>
+        <br>
+        <span>{{{ $task->due->format("H:i") }}}</span>
+      </h3>
+      {% endif; %}
     </div>
     <div class="card__details">
       <div class="card__description">
@@ -41,7 +47,7 @@
         <p>{{{ $task->getDescription() }}}</p>
       </div>
       <ul class="card__actions">
-        <li><a href="{{{ $task->getID() }}}/finish" class="button button--view">Finish</a></li>
+        <li><a href="{{{ $task->getID() }}}/finish" class="button button--view" data-link>Finish</a></li>
         <li><a href="{{{ $task->getID() }}}/edit" class="button button--edit" data-link>Edit</a></li>
         <li><a href="{{{ $task->getID() }}}/delete" class="button button--delete" data-link>Delete</a></li>
       </ul>

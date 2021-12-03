@@ -6,7 +6,7 @@ session_start();
 
 function check_cookie() {
     if (!array_key_exists('username', $_COOKIE)) {
-        setcookie('username', '-');
+        setcookie('username', '-', time() + (10 * 365 * 24 * 60 * 60), '/');
         header('Location: /');
         die();
     }
@@ -46,4 +46,5 @@ check_cookie();
 require_once 'GUI/Activity.php';
 require_once 'GUI/Task.php';
 require_once 'GUI/Intro.php';
+require_once 'GUI/Authentication.php';
 ?>

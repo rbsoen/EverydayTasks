@@ -1,12 +1,12 @@
 <?php
 
-namespace EverydayTasks\API\Task;
+namespace EverydayTasks\API\Project;
 
 use DateTime;
-use EverydayTasks\Activity;
+use EverydayTasks\Task;
 use EverydayTasks\Category;
 use EverydayTasks\Util;
-use EverydayTasks\Task;
+use EverydayTasks\Project;
 use EverydayTasks\ResponseCode;
 use EverydayTasks\Idempotency;
 use Steampixel\Route;
@@ -18,7 +18,7 @@ Route::clearRoutes();
  * @param Task $task
  * @return array
  */
-function convertTaskIntoAPIArray(Task $task): array
+function convertProjectIntoAPIArray(Task $task): array
 {
     $activity_array = Util::convertIntoApiArray(
         '/api/task/' . $task->getID(),
@@ -38,12 +38,12 @@ function convertTaskIntoAPIArray(Task $task): array
     }
 
     if (!empty($activity_array['activity'])) {
-    $activity_array['links']['activity'] = [
-        'id' => $task->activity->getID(),
-        'href' => '/api/activity/' . $task->activity->getID(),
-        'method' => 'GET'
-    ];
-}
+        $activity_array['links']['activity'] = [
+            'id' => $task->activity->getID(),
+            'href' => '/api/activity/' . $task->activity->getID(),
+            'method' => 'GET'
+        ];
+    }
     // remove original key
     unset($activity_array['category']);
     unset($activity_array['activity']);
@@ -54,33 +54,27 @@ function convertTaskIntoAPIArray(Task $task): array
  * Return a JSON representation of a generated task.
  * @param Task $task
  */
-function returnTaskJson(Task $task)
+function returnProjectJson(Task $task)
 {
-    Util::jsonResponse(convertTaskIntoAPIArray($task));
+    Util::jsonResponse(convertProjectIntoAPIArray($task));
 }
 
 /*
  * Create an task from an input array and inserts it into the database
  */
-function taskFromArray(array $array) {
+function projectFromArray(array $array) {
     $category = null;
     $description = "";
-    $activity = null;
     $due = null;
-    $username = null;
 
     // subject is required
-    if (
-        !array_key_exists('subject', $array)
-    ) {
+    if (!array_key_exists('subject', $array)) {
         http_response_code(ResponseCode::BAD_REQUEST);
         return;
     }
 
     // subject cannot be empty
-    if (
-        empty($array['subject'])
-    ) {
+    if (empty($array['subject'])) {
         http_response_code(ResponseCode::BAD_REQUEST);
         return;
     }
@@ -92,30 +86,18 @@ function taskFromArray(array $array) {
     // due date and time is optional
     if (array_key_exists('due', $array)) {
         try {
-            if (empty(trim($array['due']))) {
-                $due = null;
-            } else {
-                $due = new DateTime($array['due']);
-            }
+            $due = new DateTime($array['due']);
         } catch (Exception) {
             http_response_code(ResponseCode::BAD_REQUEST);
             return;
         }
+    } else {
+        $due = new DateTime();
     }
 
     // category is optional
     if (array_key_exists('category', $array)) {
         $category = Category::searchById(Util::$db, $array['category']);
-    }
-
-    // activity is optional
-    if (array_key_exists('activity', $array)) {
-        $activity = Activity::searchById(Util::$db, $array['activity']);
-    }
-
-    // username is optional
-    if (array_key_exists('username', $array)) {
-        $username = $array['username'];
     }
 
     // create activity and add it to the database
@@ -126,12 +108,11 @@ function taskFromArray(array $array) {
         $description,
         $due,
         $category,
-        $activity,
-        $username
+        $activity
     );
 
     $task->addToDatabase();
-    return returnTaskJson($task);
+    return returnProjectJson($task);
 }
 
 /*
@@ -143,52 +124,19 @@ function taskFromArray(array $array) {
  */
 Route::add('/', function()
 {
-    $tasks = [];
+    $projects = [];
 
-    $get = Util::getParams();
-
-    $criteria = "1=1";
-    $arguments = [];
-    if (array_key_exists('username', $get)) {
-        $criteria .= ' and username=?';
-        array_push($arguments, Util::sanitize($get['username']));
-    }
-
-    if (array_key_exists('for', $get)) {
-        switch ($get['for']) {
-            case 'today':
-                $today = new DateTime();
-                $criteria .= ' and date(due) = ?';
-                array_push($arguments, $today->format('Y-m-d'));
-                break;
-            default:
-                break;
-        }
-    }
-
-    if (array_key_exists('is', $get)) {
-        switch ($get['is']) {
-            case 'unfinished':
-                $criteria .= ' and activity is null';
-                break;
-            default:
-                break;
-        }
-    }
-
-    $criteria .= " order by -due desc";
-
-    $task_query = Task::getCustom(
+    $project_query = Project::getCustom(
         Util::$db,
-        $criteria,
-        $arguments
+        '1=1 order by due desc',
+        []
     );
 
-    foreach ($task_query as $task) {
-        array_push($tasks, convertTaskIntoAPIArray($task));
+    foreach ($project_query as $project) {
+        array_push($projects, convertProjectIntoAPIArray($project));
     }
 
-    Util::jsonResponse($tasks);
+    Util::jsonResponse($projects);
 }, 'get');
 
 // Read one task
@@ -204,7 +152,7 @@ Route::add('/([0-9a-f]+)', function($id)
      * If activity exists, return OK, display data as
      * well as REST links
      */
-    if (isset($task)) returnTaskJson($task);
+    if (isset($task)) returnProjectJson($task);
 }, 'get');
 
 // Update or Edit task
@@ -251,7 +199,7 @@ Route::add('/([0-9a-f]+)', function($id)
 
     // update date and time
     if (isset($arguments->due)){
-        $task->due = DateTime::createFromFormat('Y-m-d H:i', $arguments->due);
+        $task->due = DateTime::createFromFormat('Y-m-d H:i:s', $arguments->due);
         $changed = true;
     }
 
@@ -275,7 +223,7 @@ Route::add('/([0-9a-f]+)', function($id)
     } else {
         http_response_code(ResponseCode::NOT_MODIFIED);
     }
-    returnTaskJson($task);
+    returnProjectJson($task);
 }, 'put');
 
 // Delete task
@@ -311,7 +259,7 @@ Route::add('/', function()
 
     // Prefer form data
     if (!empty($_POST)) {
-        return taskFromArray($_POST);
+        return projectFromArray($_POST);
     }
 
     // if not, use JSON
@@ -324,63 +272,10 @@ Route::add('/', function()
             return;
         }
 
-        return taskFromArray($arguments);
+        return projectFromArray($arguments);
     }
 
     http_response_code(ResponseCode::BAD_REQUEST);
-}, 'post');
-
-// Finish task
-Route::add('/([0-9a-f]+)/finish', function($id){
-    $task = Task::searchById(Util::$db, $id);
-
-    if (empty($task)){
-        http_response_code(ResponseCode::NOT_FOUND);
-        return;
-    }
-
-    $arguments = json_decode(file_get_contents('php://input'));
-
-    if (empty($arguments)) {
-        http_response_code(ResponseCode::BAD_REQUEST);
-        return;
-    }
-
-    // (Planned) authenticate
-    if (isset($arguments->username)){
-        // username must not be empty
-        if (empty(trim($arguments->username))) {
-            http_response_code(ResponseCode::UNAUTHORIZED);
-            return;
-        }
-
-        if (trim($arguments->username) != trim($task->getUsername())) {
-            http_response_code(ResponseCode::UNAUTHORIZED);
-            return;
-        }
-    }
-
-    // Automatically create new activity
-    $activity = new Activity(
-        Util::$db,
-        bin2hex(random_bytes(4)),
-        Util::sanitize($task->getSubject()),
-        "Completed task: " . Util::sanitize($task->getSubject()),
-        new DateTime(),
-        $task->category,
-        $task->getUsername()
-    );
-
-    $activity->addToDatabase();
-
-    // Link activity with task
-    $task->activity = $activity;
-
-    // update the activity in the database
-    if ($task->replaceDatabaseEntry() == false) {
-        http_response_code(ResponseCode::NOT_MODIFIED);
-    }
-    returnTaskJson($task);
 }, 'post');
 
 // Execute API routes

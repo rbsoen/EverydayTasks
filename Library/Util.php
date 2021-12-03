@@ -20,7 +20,7 @@
          */
         public static function sanitize($string): string
         {
-            return htmlspecialchars(strip_tags($string));
+            return trim(htmlspecialchars(strip_tags($string)));
         }
 
         /**

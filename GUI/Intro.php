@@ -10,11 +10,14 @@ Route::clearRoutes();
 
 Route::add('/', function(){
     if (array_key_exists('username', $_COOKIE)) {
-        header('Location: /activity/');
-        return;
+        if ($_COOKIE['username'] != '-') {
+            header('Location: /activity/');
+            return;
+        }
     }
 
     Template::view('Templates/intro.html', [
+        "disable_bar" => true
     ]);
 }, 'get');
 
@@ -24,7 +27,8 @@ Route::add('/', function(){
             'notifications' => [
                 ['type' => 'error',
                 'message' => 'You must input a username']
-            ]
+            ],
+            "disable_bar" => true
         ]);
         return;
     }

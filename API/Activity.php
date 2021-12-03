@@ -121,36 +121,34 @@
     {
         $activities = [];
 
-        $activity_query = Activity::getCustom(
-            Util::$db,
-            '1=1 order by date_time desc',
-            []
-        );
-
         $get = Util::getParams();
+
+        $criteria = "1=1";
+        $arguments = [];
+        if (array_key_exists('username', $get)) {
+            $criteria .= ' and username=?';
+            array_push($arguments, Util::sanitize($get['username']));
+        }
 
         if (array_key_exists('for', $get)) {
             switch ($get['for']) {
                 case 'today':
                     $today = new DateTime();
-                    $activity_query = Activity::getCustom(
-                        Util::$db,
-                        'date(date_time) = ? order by date_time desc',
-                        [$today->format('Y-m-d')]
-                    );
+                    $criteria .= ' and date(date_time) = ?';
+                    array_push($arguments, $today->format('Y-m-d'));
                     break;
                 default:
                     break;
             }
         }
 
-        if (array_key_exists('username', $get)) {
-            $activity_query = Activity::getCustom(
-                Util::$db,
-                'username=?',
-                [Util::sanitize($get['username'])]
-            );
-        }
+        $criteria .= " order by date_time desc";
+
+        $activity_query = Activity::getCustom(
+            Util::$db,
+            $criteria,
+            $arguments
+        );
 
         foreach ($activity_query as $activity) {
             array_push($activities, convertActivityIntoApiArray($activity));

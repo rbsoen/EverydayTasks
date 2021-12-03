@@ -22,13 +22,14 @@ create table tasks (
     id varchar(32),
     subject text not null,
     description text,
-    due datetime not null,
+    due datetime,
     category varchar(32),
     activity varchar(32),
     username varchar(64),
 
     primary key (id),
-    foreign key (category) references categories(id)
+    foreign key (category) references categories(id),
+    foreign key (activity) references activities(id)
 );
 
 create table projects (

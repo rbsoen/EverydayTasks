@@ -39,6 +39,8 @@ Date.prototype.formatDate = function() {
  * @return {string} Formatted date
  */
 Date.prototype.formatShortDate = function() {
+    if (isNaN(this.getDate())) return "";
+
     let month_names = [
         "Jan", "Feb", "Mar", "Apr",
         "May", "Jun", "Jul", "Aug", "Sep",
@@ -54,6 +56,8 @@ Date.prototype.formatShortDate = function() {
  * @return {string} Formatted time
  */
 Date.prototype.getTimeString = function() {
+    if (isNaN(this.getHours())) return "-- : --";
+
     let hours = this.getHours();
     let minutes = this.getMinutes();
 
@@ -71,6 +75,19 @@ Date.prototype.getTimeString = function() {
 
     return `${hours}:${minutes}`
 };
+
+Date.prototype.getISODate = function() {
+    const yr = this.getFullYear().toString().padStart(4, "0");
+    const md = this.getMonth().toString().padStart(2, "0");
+    const dt = this.getDate().toString().padStart(2, "0");
+    return `${yr}-${md}-${dt}`;
+}
+
+Date.prototype.getISOTime = function() {
+    const ho = this.getHours().toString().padStart(2, "0");
+    const mi = this.getMinutes().toString().padStart(2, "0");
+    return `${ho}:${mi}`;
+}
 
 function getCookie(cname) {
     let name = cname + "=";
@@ -148,28 +165,59 @@ function getCookie(cname) {
      */
     function makeActivityCard(activity) {
         // initialize card, first element contains time
+        let isTask = false;
+        let time = activity.date_time;
+        let style = "";
+        if (activity.date_time === undefined) {
+            time = activity.due;
+            isTask = true;
+        }
+        let date_on_top = [
+            {
+                tag: "span",
+                textContent: new Date(time).formatShortDate()
+            },
+            {tag:"br"},
+            {tag: "span",
+                textContent: new Date(time)
+                    .getTimeString()
+            }
+        ]
+        if ( time == null ) {
+            date_on_top = [
+                {},{},
+                {
+                    tag: "span",
+                    textContent: "-- : --"
+                }
+            ]
+        }
+
+        if (time != null && isTask) {
+            if (new Date(time).getTime() < new Date().getTime()) {
+                style = "--card-bg: pink";
+            }
+        }
+
         let new_card = $.create(
             "section", {
                 className: "card",
+                style: style,
                 contents: [{
                     tag: "div",
                     className: "card__time",
                     contents: {
                         tag: "h3",
                         contents: [
-                            {tag: "span",
-                                textContent: new Date(activity.date_time)
-                                    .formatShortDate()
-                            },
-                            {tag: "br"},
-                            {tag: "span",
-                                textContent: new Date(activity.date_time)
-                                    .getTimeString()
-                            }
+                            date_on_top[0],
+                            date_on_top[1],
+                            date_on_top[2],
                         ]
                     }
                 }]
             });
+
+        new_card.style = style;
 
         // create card__description
         const new_card_title = $.create(
@@ -205,7 +253,7 @@ function getCookie(cname) {
                                 className: "card__badge",
                                 textContent: category.title,
                                 style: {
-                                    "--badge-color": "#" + category.color.toString(16)
+                                    "--badge-color": "#" + category.color.toString(16).padStart(6, "0")
                                 }
                             }
                         )
@@ -231,6 +279,21 @@ function getCookie(cname) {
             edit: `/activity/${activity.id}/edit`,
             delete: `/activity/${activity.id}/delete`
         };
+
+        if (isTask) {
+            if (activity.links.activity !== undefined) {
+                card_links = {
+                    edit: `/task/${activity.id}/edit`,
+                    delete: `/task/${activity.id}/delete`
+                };
+            } else {
+                card_links = {
+                    finish: `/task/${activity.id}/finish`,
+                    edit: `/task/${activity.id}/edit`,
+                    delete: `/task/${activity.id}/delete`
+                };
+            }
+        }
 
         // create action list
         let new_card_actions = $.create("ul", {
@@ -662,227 +725,242 @@ function getCookie(cname) {
             is_new_task = true;
         }
 
-        // let due_date = new Date(task.due);
-        //
-        // // make the actual form
-        // let edit_form = $.create(
-        //     "form", {
-        //         id: "edit-form",
-        //         className: "form-begin-animation",
-        //         contents: [{
-        //                 tag: "fieldset",
-        //                 contents: [
-        //                     {
-        //                         tag: "legend",
-        //                         textContent: "Task Details"
-        //                     },
-        //                     {
-        //                         tag: "label",
-        //                         for: "subject",
-        //                         textContent: "Subject"
-        //                     },
-        //                     {
-        //                         tag: "input",
-        //                         type: "text",
-        //                         id: "subject",
-        //                         name: "subject",
-        //                         value: task.subject
-        //                     },
-        //                     {
-        //                         tag: "br"
-        //                     },
-        //                     {
-        //                         tag: "label",
-        //                         for: "description",
-        //                         textContent: "Description"
-        //                     },
-        //                     {
-        //                         tag: "textarea",
-        //                         id: "description",
-        //                         name: "description",
-        //                         rows: 3,
-        //                         textContent: task.description
-        //                     },
-        //                     {
-        //                         tag: "br"
-        //                     },
-        //                     {
-        //                         tag: "label",
-        //                         for: "due",
-        //                         textContent: "Due by:"
-        //                     },
-        //                     {
-        //                         tag: "div",
-        //                         id: "due",
-        //                         contents: [
-        //                             {
-        //                                 tag: "input",
-        //                                 id: "due-date",
-        //                                 type: "date"
-        //                             },
-        //                             {
-        //                                 tag: "input",
-        //                                 id: "due-time",
-        //                                 type: "time"
-        //                             }
-        //                         ]
-        //                     },
-        //                     {
-        //                         tag: "br"
-        //                     },
-        //                     {
-        //                         tag: "label",
-        //                         for: "category",
-        //                         textContent: "Category"
-        //                     },
-        //                     {
-        //                         tag: "select",
-        //                         name: "category",
-        //                         id: "category",
-        //                         contents: [
-        //                             $.create("option", {
-        //                                 value: "",
-        //                                 textContent: "-- No category --"
-        //                             })
-        //                         ]
-        //                     }
-        //                 ]
-        //             },
-        //             {
-        //                 tag: "fieldset",
-        //                 className: "hidden-and-submit",
-        //                 contents: [{
-        //                         tag: "input",
-        //                         id: "submit",
-        //                         type: "submit",
-        //                         className: "button button--edit"
-        //                     },
-        //                     {
-        //                         tag: "button",
-        //                         id: "cancel",
-        //                         textContent: "Cancel",
-        //                         className: "button button--view"
-        //                     }
-        //                 ]
-        //             }
-        //         ]
-        //     }
-        // );
-        //
-        // // Add container for form overlay
-        // let edit_form_container = $.create(
-        //     "div", {
-        //         className: "fullsize-form-container",
-        //         contents: [edit_form]
-        //     }
-        // );
-        //
-        // // add categories to the selection
-        // let categories = edit_form.querySelector("#category");
-        // addRequest(
-        //     "/api/category",
-        //     {
-        //         method: "get",
-        //         responseType: "json"
-        //     },
-        //     function(cat_req) {
-        //         let categories_list = cat_req.response;
-        //         for (let category of categories_list) {
-        //             let cat_option = $.create(
-        //                 "option", {
-        //                     value: category.id,
-        //                     textContent: category.title
-        //                 }
-        //             );
-        //
-        //             // automatically select the activity's category
-        //             try {
-        //                 if (activity.links.category.id == category.id)
-        //                     cat_option.selected = true
-        //             } catch (e) {}
-        //
-        //             // add categories to selection
-        //             categories.appendChild(cat_option);
-        //         }
-        //     },
-        //     function(e){}
-        // );
-        //
-        // // Save changes
-        // let submit_button = edit_form.submit;
-        // submit_button.addEventListener("click", function(e) {
-        //     e.preventDefault();
-        //
-        //     if (is_new_task) {
-        //         pushNotification({
-        //             type: "normal",
-        //             message: "Creating activity, please wait."
-        //         });
-        //     } else {
-        //         pushNotification({
-        //             type: "normal",
-        //             message: "Editing activity, please wait."
-        //         });
-        //     }
-        //
-        //     // extract form data
-        //     let edit_form_data = new FormData(edit_form);
-        //
-        //     // custom submit event
-        //     addRequest(
-        //         activity.links.edit.href,
-        //         {
-        //             method: activity.links.edit.method,
-        //             responseType: "json",
-        //             headers: {
-        //                 "Content-Type": "application/json"
-        //             },
-        //             data: JSON.stringify({
-        //                 subject: edit_form_data.get("subject"),
-        //                 description: edit_form_data.get("description"),
-        //                 category: edit_form_data.get("category")
-        //             })
-        //         },
-        //         function(e) {
-        //             if (is_new_task) {
-        //                 pushNotification({
-        //                     type: "success",
-        //                     message: "Activity created successfully!"
-        //                 });
-        //             } else {
-        //                 pushNotification({
-        //                     type: "success",
-        //                     message: "Activity edited successfully!"
-        //                 });
-        //             }
-        //             // refresh all activities
-        //             doRoute(last_page, true);
-        //             closeForm();
-        //         },
-        //         function(e) {
-        //             if (is_new_task) {
-        //                 pushNotification({
-        //                     type: "error",
-        //                     message: "Can't create activity, try again later."
-        //                 });
-        //             } else {
-        //                 pushNotification({
-        //                     type: "error",
-        //                     message: "Can't edit activity, try again later."
-        //                 });
-        //             }
-        //         }
-        //     );
-        // });
-        //
-        // // Cancel editing
-        // let cancel_button = edit_form.querySelector("#cancel");
-        // cancel_button.addEventListener("click", function(e) {
-        //     e.preventDefault();
-        //     history.pushState({}, '', last_page);
-        //     closeForm();
-        // });
-        // return edit_form_container;
+        let due_date = new Date(task.due);
+        // make the actual form
+        let edit_form = $.create(
+            "form", {
+                id: "edit-form",
+                className: "form-begin-animation",
+                contents: [{
+                        tag: "fieldset",
+                        contents: [
+                            {
+                                tag: "legend",
+                                textContent: "Task Details"
+                            },
+                            {
+                                tag: "label",
+                                for: "subject",
+                                textContent: "Subject"
+                            },
+                            {
+                                tag: "input",
+                                type: "text",
+                                id: "subject",
+                                name: "subject",
+                                value: task.subject
+                            },
+                            {
+                                tag: "br"
+                            },
+                            {
+                                tag: "label",
+                                for: "description",
+                                textContent: "Description"
+                            },
+                            {
+                                tag: "textarea",
+                                id: "description",
+                                name: "description",
+                                rows: 3,
+                                textContent: task.description
+                            },
+                            {
+                                tag: "br"
+                            },
+                            {
+                                tag: "label",
+                                for: "due",
+                                textContent: "Due by:"
+                            },
+                            {
+                                tag: "div",
+                                id: "due",
+                                contents: [
+                                    {
+                                        tag: "input",
+                                        id: "due-date",
+                                        name: "due-date",
+                                        type: "date",
+                                        value: due_date.getISODate(),
+                                        required: true
+                                    },
+                                    {
+                                        tag: "input",
+                                        id: "due-time",
+                                        name: "due-time",
+                                        type: "time",
+                                        value: due_date.getISOTime(),
+                                        required: true
+                                    }
+                                ]
+                            },
+                            {
+                                tag: "br"
+                            },
+                            {
+                                tag: "label",
+                                for: "category",
+                                textContent: "Category"
+                            },
+                            {
+                                tag: "select",
+                                name: "category",
+                                id: "category",
+                                contents: [
+                                    $.create("option", {
+                                        value: "",
+                                        textContent: "-- No category --"
+                                    })
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        tag: "fieldset",
+                        className: "hidden-and-submit",
+                        contents: [{
+                                tag: "input",
+                                id: "submit",
+                                type: "submit",
+                                className: "button button--edit"
+                            },
+                            {
+                                tag: "button",
+                                id: "cancel",
+                                textContent: "Cancel",
+                                className: "button button--view"
+                            }
+                        ]
+                    }
+                ]
+            }
+        );
+
+        // Add container for form overlay
+        let edit_form_container = $.create(
+            "div", {
+                className: "fullsize-form-container",
+                contents: [edit_form]
+            }
+        );
+
+        // add categories to the selection
+        let categories = edit_form.querySelector("#category");
+        addRequest(
+            "/api/category",
+            {
+                method: "get",
+                responseType: "json"
+            },
+            function(cat_req) {
+                let categories_list = cat_req.response;
+                for (let category of categories_list) {
+                    let cat_option = $.create(
+                        "option", {
+                            value: category.id,
+                            textContent: category.title
+                        }
+                    );
+
+                    // automatically select the activity's category
+                    try {
+                        if (task.links.category.id == category.id)
+                            cat_option.selected = true
+                    } catch (e) {}
+
+                    // add categories to selection
+                    categories.appendChild(cat_option);
+                }
+            },
+            function(e){}
+        );
+
+        // Save changes
+        let submit_button = edit_form.submit;
+        submit_button.addEventListener("click", function(e) {
+            e.preventDefault();
+
+            // extract form data
+            let edit_form_data = new FormData(edit_form);
+
+            if (edit_form_data.get("subject") == "") {
+                pushNotification({
+                    type: "error",
+                    message: "Subject cannot be empty."
+                });
+                return;
+            };
+
+            if (is_new_task) {
+                pushNotification({
+                    type: "normal",
+                    message: "Creating task, please wait."
+                });
+            } else {
+                pushNotification({
+                    type: "normal",
+                    message: "Editing task, please wait."
+                });
+            }
+
+            // custom submit event
+            addRequest(
+                task.links.edit.href,
+                {
+                    method: task.links.edit.method,
+                    responseType: "json",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    data: JSON.stringify({
+                        subject: edit_form_data.get("subject"),
+                        description: edit_form_data.get("description"),
+                        category: edit_form_data.get("category"),
+                        username: getCookie("username"),
+                        due: `${edit_form_data.get("due-date")} ${edit_form_data.get("due-time")}`
+                    })
+                },
+                function(e) {
+                    if (is_new_task) {
+                        pushNotification({
+                            type: "success",
+                            message: "Task created successfully!"
+                        });
+                    } else {
+                        pushNotification({
+                            type: "success",
+                            message: "Task edited successfully!"
+                        });
+                    }
+                    // refresh all activities
+                    doRoute(last_page, true);
+                    closeForm();
+                },
+                function(e) {
+                    if (is_new_task) {
+                        pushNotification({
+                            type: "error",
+                            message: "Can't create task, try again later."
+                        });
+                    } else {
+                        pushNotification({
+                            type: "error",
+                            message: "Can't edit task, try again later."
+                        });
+                    }
+                }
+            );
+        });
+
+        // Cancel editing
+        let cancel_button = edit_form.querySelector("#cancel");
+        cancel_button.addEventListener("click", function(e) {
+            e.preventDefault();
+            history.pushState({}, '', last_page);
+            closeForm();
+        });
+        return edit_form_container;
     }
 
     /**
@@ -912,7 +990,7 @@ function getCookie(cname) {
                                         tag: "strong",
                                         textContent: "delete"
                                     },
-                                    " this activity?"
+                                    " this?"
                                 ]
                             },
                         ]
@@ -920,18 +998,19 @@ function getCookie(cname) {
                     {
                         tag: "fieldset",
                         className: "hidden-and-submit",
-                        contents: [{
-                                tag: "input",
-                                id: "delete",
-                                type: "submit",
-                                value: "Delete",
-                                className: "button button--delete"
-                            },
+                        contents: [
                             {
                                 tag: "button",
                                 id: "cancel",
                                 textContent: "Cancel",
                                 className: "button button--view"
+                            },
+                            {
+                                tag: "input",
+                                id: "delete",
+                                type: "submit",
+                                value: "Delete",
+                                className: "button button--delete"
                             }
                         ]
                     }
@@ -953,7 +1032,7 @@ function getCookie(cname) {
             e.preventDefault();
             pushNotification({
                 type: "normal",
-                message: "Deleting activity, please wait."
+                message: "Deleting, please wait."
             });
 
             // Perform deletion
@@ -969,7 +1048,7 @@ function getCookie(cname) {
                 function(e) {
                     pushNotification({
                         type: "success",
-                        message: "Activity deleted successfully!"
+                        message: "Deleted successfully!"
                     });
                     // refresh all activities
                     doRoute(last_page, true);
@@ -978,7 +1057,7 @@ function getCookie(cname) {
                 function(e) {
                     pushNotification({
                         type: "error",
-                        message: "Can't delete activity, try again later."
+                        message: "Can't delete, try again later."
                     });
                 }
             );
@@ -986,7 +1065,7 @@ function getCookie(cname) {
             // make request
             pushNotification({
                 type: "normal",
-                message: "Deleting activity, please wait."
+                message: "Deleting, please wait."
             });
         });
 
@@ -1021,25 +1100,34 @@ function getCookie(cname) {
 
         // special cases: load edit page
         if (
-            special_case = /\/activity\/([0-9a-f]{8})\/edit\/?$/.exec(page_name)
+            special_case = /\/(activity|task)\/([0-9a-f]{8})\/edit\/?$/.exec(page_name)
         ) {
             addLoadingScreen();
             addRequest(
-                `/api/activity/${special_case[1]}`,
+                `/api/${special_case[1]}/${special_case[2]}`,
                 {
                     method: "get",
                     responseType: "json"
                 },
                 function(e) {
                     let activity = e.response;
-                    $('#extra').appendChild(createEditForm(activity));
+                    switch (special_case[1]) {
+                        case 'task':
+                            $('#extra').appendChild(createTaskEditForm(activity));
+                            break;
+                        default:
+                            $('#extra').appendChild(createEditForm(activity));
+                            break;
+                    }
                     removeLoadingScreen();
                 },
                 function(e) {
                     pushNotification({
                         type: "error",
-                        message: "Failed to load activity for editing"
+                        message: `Failed to load ${special_case[1]} for editing`
                     });
+                    console.error(e)
+                    removeLoadingScreen();
                 }
             );
             return;
@@ -1047,11 +1135,11 @@ function getCookie(cname) {
 
         // special cases: load delete page
         if (
-            special_case = /\/activity\/([0-9a-f]{8})\/delete\/?$/.exec(page_name)
+            special_case = /\/(activity|task)\/([0-9a-f]{8})\/delete\/?$/.exec(page_name)
         ) {
             addLoadingScreen();
             addRequest(
-                `/api/activity/${special_case[1]}`,
+                `/api/${special_case[1]}/${special_case[2]}`,
                 {
                     method: "get",
                     responseType: "json"
@@ -1066,6 +1154,43 @@ function getCookie(cname) {
                         type: "error",
                         message: "Failed to load activity for deleting"
                     });
+                }
+            );
+            return;
+        }
+
+        // special cases: load task finish page
+        if (
+            special_case = /\/task\/([0-9a-f]{8})\/finish\/?$/.exec(page_name)
+        ) {
+            addLoadingScreen();
+            addRequest(
+                `/api/task/${special_case[1]}/finish`,
+                {
+                    method: "post",
+                    responseType: "json",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    data: JSON.stringify({
+                        username: getCookie("username")
+                    })
+                },
+                function(e) {
+                    pushNotification({
+                        type: "success",
+                        message: "Finished the task!"
+                    });
+                    // refresh all activities
+                    doRoute(last_page, true);
+                    removeLoadingScreen();
+                },
+                function(e) {
+                    pushNotification({
+                        type: "error",
+                        message: "Failed to load task to finish"
+                    });
+                    removeLoadingScreen();
                 }
             );
             return;
@@ -1112,6 +1237,40 @@ function getCookie(cname) {
                 );
                 break;
 
+
+            case "/task/":
+                addLoadingScreen();
+                addRequest(
+                    "/api/task/?is=unfinished&username=" + getCookie('username'),
+                    {
+                        method: "get",
+                        responseType: "json"
+                    },
+                    function(e) {
+                        // load content for the "all activities" page
+                        clearWholePage(function(e){
+                            activities = this[0].response;
+                            let date = new Date();
+                            createActivityPageHeader(`Tasks Left to Do for ${getCookie('username')}`);
+                            // show all activities link
+                            let all_activities_link =
+                                $.create("a", {
+                                    id: "view-all-activities",
+                                    textContent: "View all tasks",
+                                    href: "all",
+                                    attributes: {"data-link": ""}
+                                });
+                            $('main').appendChild(all_activities_link);
+                            addCommonHandlers();
+                            fadeActivitiesIn(activities);
+                        }, e);
+                    },
+                    function(e) {
+                        console.error(e);
+                    }
+                );
+                break;
+
             case "/activity/all":
                 addLoadingScreen();
                 addRequest(
@@ -1125,6 +1284,29 @@ function getCookie(cname) {
                         clearWholePage(function(e){
                             activities = this[0].response;
                             createActivityPageHeader(`All Activities for ${getCookie('username')}`);
+                            addCommonHandlers();
+                            fadeActivitiesIn(activities);
+                        }, e);
+                    },
+                    function(e) {
+                        console.error(e)
+                    }
+                );
+                break;
+
+            case "/task/all":
+                addLoadingScreen();
+                addRequest(
+                    "/api/task/?username="  + getCookie('username'),
+                    {
+                        method: "get",
+                        responseType: "json"
+                    },
+                    function(e) {
+                        // load content for the "all activities" page
+                        clearWholePage(function(e){
+                            activities = this[0].response;
+                            createActivityPageHeader(`All Tasks for ${getCookie('username')}`);
                             addCommonHandlers();
                             fadeActivitiesIn(activities);
                         }, e);
@@ -1179,7 +1361,7 @@ function getCookie(cname) {
                e.preventDefault();
 
                doRoute(
-                   link.href.replace(/https?:\/\/[a-z\-_]+\.[a-z]+\//, '/'),
+                   link.href.replace(/https?:\/\/([a-z\-_0-9]+\.?)+\//, '/'),
                    true
                );
             });
