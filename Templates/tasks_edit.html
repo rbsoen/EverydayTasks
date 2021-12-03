@@ -9,21 +9,27 @@
     <h2>{{{ $page_heading }}}</h2>
 </header>
 
-{% if (!empty($activity)): %}
+{% if (!empty($task)): %}
 <form method="post" id="edit-form">
     <fieldset>
-        <legend>Activity Details</legend>
+        <legend>Task Details</legend>
         <label for="subject">Subject</label>
-        <input type="text" id="subject" name="subject" value="{{{ $activity->getSubject() }}}">
+        <input type="text" id="subject" name="subject" value="{{{ $task->getSubject() }}}">
         <br>
         <label for="description">Description</label>
-        <textarea id="description" name="description" rows="3">{{{ $activity->getDescription() }}}</textarea>
+        <textarea id="description" name="description" rows="3">{{{ $task->getDescription() }}}</textarea>
         <br>
+        <label for="due-date">Due at</label>
+        {% if (!empty($task->due)): %}
+        <input id="due-date" name="due" type="datetime-local" value="{{{ $task->due->format('Y-m-d\TH:i:s') }}}">
+        {% else: %}
+        <input id="due-date" name="due" type="datetime-local">
+        {% endif; %}
         <label for="category">Category</label>
         <select name="category" id="category">
             <option value="">-- No category --</option>
-            {% foreach ( $category_list as $category ): %}
-            <option value="{{{ $category->getID() }}}" {% if($activity->getCategory() == $category) echo "selected" %}>{{{ $category->getTitle() }}}</option>
+        {% foreach ( $category_list as $category ): %}
+            <option value="{{{ $category->getID() }}}" {% if($task->getCategory() == $category) echo "selected" %}>{{{ $category->getTitle() }}}</option>
         {% endforeach; %}
         </select>
     </fieldset>
@@ -33,7 +39,7 @@
     </fieldset>
 </form>
 {% else: %}
-<p>Invalid activity ID.</p>
+<p>Invalid task ID.</p>
 {% endif; %}
 
 {% endblock %}
