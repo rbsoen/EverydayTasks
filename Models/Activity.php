@@ -92,16 +92,10 @@
          * @return Activity|null Activity, if there is one with the requested ID
          */
         public static function searchById(PDO $db, string $id): Activity | null {
-            $query = $db->prepare('
-                select * from activities where id=?
-            ');
-            $query->execute([$id]);
-
-            $result = $query->fetch();
-
-            return $result
-                ? self::toActivity($db, $result)   // if result is present
-                : null;                             // if result not found
+            $result = self::getCustom($db, "id=?", ["id"=>$id]);
+            if (count($result) > 0)
+                return $result[0];
+            return null;
         }
 
         /**
@@ -110,16 +104,7 @@
          * @return array All activity objects
          */
         public static function getAll(PDO $db): array {
-            $activities = [];
-            $query = $db->prepare('
-                select * from activities
-            ');
-            $query->execute();
-
-            while ($result = $query->fetch()) {
-                array_push($activities, self::toActivity($db, $result));
-            }
-            return $activities;
+            return self::getCustom($db, "1=1", []);
         }
 
         /**
@@ -166,38 +151,23 @@
 
         /**
          * Converts from Array or PDORow result to a PHP Activity object.
-         * @param mixed $result Fetch result
+         * @param array $result Fetch result
          * @return Activity
          */
-        public static function toActivity(PDO $db, array|object $result): Activity
+        public static function toActivity(PDO $db, array $result): Activity
         {
-            if (gettype($result) == 'array') {
-                $category = is_null($result['category'])
-                    ? null
-                    : Category::searchById($db, $result['category']);
-                return new Activity(
-                    $db,
-                    $result['id'],
-                    $result['subject'],
-                    $result['description'],
-                    DateTime::createFromFormat('Y-m-d H:i:s', $result['date_time']),
-                    $category,
-                    $result['username']
-                );
-            } else {
-                $category = is_null($result->category)
-                    ? null
-                    : Category::searchById($db, $result['category']);
-                return new Activity(
-                    $db,
-                    $result->id,
-                    $result->subject,
-                    $result->description,
-                    DateTime::createFromFormat('Y-m-d H:i:s', $result->date_time),
-                    $category,
-                    $result->username
-                );
-            }
+            $category = is_null($result['category'])
+                ? null
+                : Category::searchById($db, $result['category']);
+            return new Activity(
+                $db,
+                $result['id'],
+                $result['subject'],
+                $result['description'],
+                DateTime::createFromFormat('Y-m-d H:i:s', $result['date_time']),
+                $category,
+                $result['username']
+            );
         }
     }
 ?>

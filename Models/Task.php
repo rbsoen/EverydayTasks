@@ -96,16 +96,10 @@ class Task {
      * @return Task|null If there is one with the requested ID
      */
     public static function searchById(PDO $db, string $id): Task | null {
-        $query = $db->prepare('
-                select * from tasks where id=?
-            ');
-        $query->execute([$id]);
-
-        $result = $query->fetch();
-
-        return $result
-            ? self::toTask($db, $result)   // if result is present
-            : null;                             // if result not found
+        $result = self::getCustom($db, "id=?", ["id"=>$id]);
+        if (count($result) > 0)
+            return $result[0];
+        return null;
     }
 
     /**
@@ -114,16 +108,7 @@ class Task {
      * @return array All task objects
      */
     public static function getAll(PDO $db): array {
-        $activities = [];
-        $query = $db->prepare('
-                select * from tasks
-            ');
-        $query->execute();
-
-        while ($result = $query->fetch()) {
-            array_push($activities, self::toTask($db, $result));
-        }
-        return $activities;
+        return self::getCustom($db, "1=1", []);
     }
 
     /**
