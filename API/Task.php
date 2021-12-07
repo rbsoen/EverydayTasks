@@ -208,7 +208,7 @@ Route::add('/([0-9a-f]+)', function($id)
 }, 'get');
 
 // Update or Edit task
-Route::add('/([0-9a-f]+)', function($id)
+Route::add('/([0-9a-f]+)/edit', function($id)
 {
     if ($_SERVER['CONTENT_TYPE'] != 'application/json') {
         http_response_code(ResponseCode::BAD_REQUEST);
@@ -276,10 +276,10 @@ Route::add('/([0-9a-f]+)', function($id)
         http_response_code(ResponseCode::NOT_MODIFIED);
     }
     returnTaskJson($task);
-}, 'put');
+}, 'post');
 
 // Delete task
-Route::add('/([0-9a-f]+)', function($id)
+Route::add('/([0-9a-f]+)/delete', function($id)
 {
     /*
      * Find the requested activity and throw Not Found
@@ -299,7 +299,7 @@ Route::add('/([0-9a-f]+)', function($id)
 
     // OK
     http_response_code(ResponseCode::NO_CONTENT);
-}, 'delete');
+}, 'post');
 
 // Create task
 Route::add('/', function()

@@ -178,7 +178,7 @@
     }, 'get');
 
     // Update or Edit activity
-    Route::add('/([0-9a-f]+)', function($id)
+    Route::add('/([0-9a-f]+)/edit', function($id)
     {
         /*
          * Request has a body, that MUST be JSON
@@ -253,10 +253,10 @@
         }
         returnActivityJson($activity);
 
-    }, 'put');
+    }, 'post');
 
     // Delete activity
-    Route::add('/([0-9a-f]+)', function($id)
+    Route::add('/([0-9a-f]+)/delete', function($id)
     {
         /*
          * Find the requested activity and throw Not Found
@@ -276,7 +276,7 @@
 
         // OK
         http_response_code(ResponseCode::NO_CONTENT);
-    }, 'delete');
+    }, 'post');
 
     // Create activity
     Route::add('/', function()

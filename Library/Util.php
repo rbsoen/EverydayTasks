@@ -102,12 +102,12 @@
                         'method' => 'GET'
                     ],
                     'edit' => [
-                        'href' => $self,
-                        'method' => 'PUT'
+                        'href' => $self ."/edit",
+                        'method' => 'POST'
                     ],
                     'delete' => [
-                        'href' => $self,
-                        'method' => 'DELETE'
+                        'href' => $self . "/delete",
+                        'method' => 'POST'
                     ]
                 ],
             ]);
