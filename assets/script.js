@@ -654,7 +654,7 @@ function getCookie(cname) {
                         subject: edit_form_data.get("subject"),
                         description: edit_form_data.get("description"),
                         category: edit_form_data.get("category"),
-                        username: getCookie("username")
+                        username: "-"
                     })
                 },
                 function(e) {
@@ -720,7 +720,7 @@ function getCookie(cname) {
                         href: "/api/task/"
                     }
                 },
-                username: getCookie("username")
+                username: "-"
             }
             is_new_task = true;
         }
@@ -917,7 +917,7 @@ function getCookie(cname) {
                         subject: edit_form_data.get("subject"),
                         description: edit_form_data.get("description"),
                         category: edit_form_data.get("category"),
-                        username: getCookie("username"),
+                        username: "-",
                         due: `${edit_form_data.get("due-date")} ${edit_form_data.get("due-time")}`
                     })
                 },
@@ -1173,7 +1173,7 @@ function getCookie(cname) {
                         "Content-Type": "application/json"
                     },
                     data: JSON.stringify({
-                        username: getCookie("username")
+                        username: "-"
                     })
                 },
                 function(e) {

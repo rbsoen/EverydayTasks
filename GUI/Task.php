@@ -16,6 +16,8 @@ use EverydayTasks\Util;
      * View tasks left to be done
      */
     Route::add('/', function(){
+        check_cookie();
+
         $tasks = Task::getCustom(
             Util::$db,
             'activity is null and username=? order by -due desc',
@@ -32,6 +34,8 @@ use EverydayTasks\Util;
      * View all tasks currently logged
      */
     Route::add('/all', function(){
+        check_cookie();
+
         $tasks = Task::getCustom(
             Util::$db,
             'username=? order by -due desc',

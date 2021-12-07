@@ -1,0 +1,18 @@
+DirectoryIndex index.php
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^$ index.php [QSA,L]
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.*)$ index.php [QSA,L]
+	RewriteRule ^API/.*$ - [F,L]
+	RewriteRule ^config.php$ - [F,L]
+	RewriteRule ^cache/.*$ - [F,L]
+	RewriteRule ^Documentation/.*$ - [F,L]
+	RewriteRule ^GUI/.*$ - [F,L]
+	RewriteRule ^Library/.*$ - [F,L]
+	RewriteRule ^Models/.*$ - [F,L]
+	RewriteRule ^Templates/.*$ - [F,L]
+	RewriteRule ^Tests/.*$ - [F,L]
+	RewriteRule ^tmp/.*$ - [F,L]
+</IfModule>

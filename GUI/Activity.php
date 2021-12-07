@@ -15,12 +15,14 @@
      * View activities for the current day
      */
     Route::add('/', function(){
+        check_cookie();
+
         $today = new DateTime();
         $activities_today = Activity::getCustom(
             Util::$db,
             'username=? and date(date_time) = ? order by date_time desc',
             [
-                Util::sanitize($_COOKIE['username']),
+                Util::sanitize($_SESSION['user']),
                 $today->format('Y-m-d')
             ]
         );
@@ -36,11 +38,13 @@
      * View all activities currently logged
      */
     Route::add('/all', function(){
+        check_cookie();
+
         $today = new DateTime();
         $activities = Activity::getCustom(
             Util::$db,
             'username=? order by date_time desc',
-            [Util::sanitize($_COOKIE['username'])]
+            [Util::sanitize($_SESSION['user'])]
         );
 
         Template::view('Templates/activities.html', [
@@ -53,6 +57,8 @@
      * Edit an activity
      */
     Route::add('/([0-9a-f]{8})/edit', function($id){
+        check_cookie();
+
         $activity = Activity::searchById(Util::$db, $id);
         $category_list = Category::getAll(Util::$db);
 
@@ -102,6 +108,8 @@
      * Delete an activity
      */
     Route::add('/([0-9a-f]{8})/delete', function($id){
+        check_cookie();
+
         $activity = Activity::searchById(Util::$db, $id);
 
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -133,6 +141,8 @@
      * Add an activity
      */
     Route::add('/add', function(){
+        check_cookie();
+
         $category_list = Category::getAll(Util::$db);
 
         // create base activity

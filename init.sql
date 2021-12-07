@@ -6,6 +6,14 @@ create table categories (
 	primary key (id)
 );
 
+
+create table users (
+   name varchar(64),
+   password varchar(128) not null,
+
+   primary key (name)
+);
+
 create table activities (
     id varchar(32),
     subject text not null,
@@ -15,7 +23,8 @@ create table activities (
     username varchar(64),
 
     primary key (id),
-    foreign key (category) references categories(id)
+    foreign key (category) references categories(id),
+    foreign key (username) references users(name)
 );
 
 create table tasks (
@@ -29,7 +38,8 @@ create table tasks (
 
     primary key (id),
     foreign key (category) references categories(id),
-    foreign key (activity) references activities(id)
+    foreign key (activity) references activities(id),
+    foreign key (username) references users(name)
 );
 
 create table projects (

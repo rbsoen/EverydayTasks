@@ -92,7 +92,7 @@
          * @return Activity|null Activity, if there is one with the requested ID
          */
         public static function searchById(PDO $db, string $id): Activity | null {
-            $result = self::getCustom($db, "id=?", ["id"=>$id]);
+            $result = self::getCustom($db, "id=:id", ["id"=>$id]);
             if (count($result) > 0)
                 return $result[0];
             return null;

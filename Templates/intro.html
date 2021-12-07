@@ -6,18 +6,23 @@ Introduce Yourself
 
 {% block content %}
 <header class="activity-heading">
-    <h2>Introduce yourself</h2>
+    <h2>{{{ $pagetitle }}}</h2>
 </header>
 
-<p>Enter your name here:</p>
+{% if ($register_prompt): %}
+<p>If you aren't registered, please <a href="/register">do so here</a>.</p>
+{% endif; %}
 
 <form method="post" id="edit-form">
     <fieldset>
         <label for="username">Your name</label>
-        <input name="username" id="username" required>
+        <input name="un" id="username" pattern="[a-zA-Z 0-9]+" required>
+        <label for="password">Password</label>
+        <input name="pw" type="password" id="password" required>
     </fieldset>
     <fieldset class="hidden-and-submit">
-        <input type="submit" class="button button--edit">
+        <input type="submit" value="Enter" class="button button--edit">
     </fieldset>
 </form>
+
 {% endblock %}

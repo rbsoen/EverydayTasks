@@ -92,7 +92,9 @@
 
         // username is optional
         if (array_key_exists('username', $array)) {
-            $username = $array['username'];
+            if (isset($_SESSION['user'])) {
+                $username = $_SESSION['user'];
+            }
         }
 
         // create activity and add it to the database
@@ -126,8 +128,10 @@
         $criteria = "1=1";
         $arguments = [];
         if (array_key_exists('username', $get)) {
-            $criteria .= ' and username=?';
-            array_push($arguments, Util::sanitize($get['username']));
+            if (isset($_SESSION['user'])) {
+                $criteria .= ' and username=?';
+                array_push($arguments, $_SESSION['user']);
+            }
         }
 
         if (array_key_exists('for', $get)) {
