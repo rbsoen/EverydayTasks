@@ -4,7 +4,8 @@
 
     use DateTime;
     use EverydayTasks\Category;
-    use EverydayTasks\Util;
+use EverydayTasks\Task;
+use EverydayTasks\Util;
     use EverydayTasks\Activity;
     use Steampixel\Route;
     use CodeShack\Template;
@@ -27,8 +28,17 @@
             ]
         );
 
+        $activity_with_task = [];
+
+        foreach ($activities_today as $activity) {
+            array_push($activity_with_task, [
+                $activity,
+                !empty(Task::getCustom(Util::$db, "activity=?", [$activity->getId()]))
+            ]);
+        }
+
         Template::view('Templates/activities.html', [
-            'activities' => $activities_today,
+            'activities' => $activity_with_task,
             'is_view_today' => true,
             'today' => $today
         ]);
@@ -47,8 +57,17 @@
             [Util::sanitize($_SESSION['user'])]
         );
 
+        $activity_with_task = [];
+
+        foreach ($activities as $activity) {
+            array_push($activity_with_task, [
+                $activity,
+                !empty(Task::getCustom(Util::$db, "activity=?", [$activity->getId()]))
+            ]);
+        }
+
         Template::view('Templates/activities.html', [
-            'activities' => $activities,
+            'activities' => $activity_with_task,
             'is_view_today' => false
         ]);
     }, 'get');

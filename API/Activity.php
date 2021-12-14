@@ -4,7 +4,8 @@
 
     use DateTime;
     use EverydayTasks\Category;
-    use EverydayTasks\Util;
+use EverydayTasks\Task;
+use EverydayTasks\Util;
     use EverydayTasks\Activity;
     use EverydayTasks\ResponseCode;
     use EverydayTasks\Idempotency;
@@ -36,6 +37,22 @@
         }
         // remove original key
         unset($activity_array['category']);
+
+        $activity_array['links']['task'] = null;
+
+        /**
+         * Find associated task
+         */
+        $task = Task::getCustom(Util::$db, "activity=?", [$activity->getID()]);
+
+        if (!empty($task)) {
+            $task = $task[0];
+            $activity_array['links']['task'] = [
+                'id' => $task->getID(),
+                'href' => '/api/task/' . $task->getID(),
+                'method' => 'GET'
+            ];
+        }
 
         return $activity_array;
     }
