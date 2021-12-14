@@ -23,27 +23,28 @@
   <section class="card">
     <div class="card__time">
       <h3>
-          <span>{{{ ltrim($activity->date_time->format("d M"), "0") }}}</span>
+          <span>{{{ ltrim($activity[0]->date_time->format("d M"), "0") }}}</span>
           <br>
-          <span>{{{ $activity->date_time->format("H:i") }}}</span>
+          <span>{{{ $activity[0]->date_time->format("H:i") }}}</span>
       </h3>
     </div>
     <div class="card__details">
       <div class="card__description">
-        <h4>{{{ $activity->getSubject() }}}
-          {% if (!empty($activity->getCategory())): %}
+        <h4>{{{ $activity[0]->getSubject() }}}
+          {% if (!empty($activity[0]->getCategory())): %}
           <span class="hidden">, categorized in</span>
-          <span class="card__badge" style="--badge-color: #{{{ str_pad(sprintf('%06x', $activity->getCategory()->color), 6, '0', STR_PAD_LEFT) }}}">
-                  {{{ $activity->getCategory()->getTitle() }}}
+          <span class="card__badge" style="--badge-color: #{{{ str_pad(sprintf('%06x', $activity[0]->getCategory()->color), 6, '0', STR_PAD_LEFT) }}}">
+                  {{{ $activity[0]->getCategory()->getTitle() }}}
                 </span>
           {% endif; %}
         </h4>
-        <p>{{{ $activity->getDescription() }}}</p>
+        <p>{{{ $activity[0]->getDescription() }}}</p>
       </div>
       <ul class="card__actions">
-<!--        <li><a href="{{{ $activity->getID() }}}" class="button button&#45;&#45;view">View</a></li>-->
-        <li><a href="{{{ $activity->getID() }}}/edit" class="button button--edit" data-link>Edit</a></li>
-        <li><a href="{{{ $activity->getID() }}}/delete" class="button button--delete" data-link>Delete</a></li>
+        <li><a href="{{{ $activity[0]->getID() }}}/edit" class="button button--edit" data-link>Edit</a></li>
+          {% if (!$activity[1]): %}
+        <li><a href="{{{ $activity[0]->getID() }}}/delete" class="button button--delete" data-link>Delete</a></li>
+          {% endif; %}
       </ul>
     </div>
   </section>

@@ -115,7 +115,9 @@ function taskFromArray(array $array) {
 
     // username is optional
     if (array_key_exists('username', $array)) {
-        $username = $array['username'];
+        if (isset($_SESSION['user'])) {
+            $username = $_SESSION['user'];
+        }
     }
 
     // create activity and add it to the database
@@ -251,8 +253,22 @@ Route::add('/([0-9a-f]+)', function($id)
 
     // update date and time
     if (isset($arguments->due)){
-        $task->due = DateTime::createFromFormat('Y-m-d H:i', $arguments->due);
-        $changed = true;
+        if (!empty(trim($arguments->due))) {
+            try {
+                $task->due = DateTime::createFromFormat('Y-m-d H:i', trim($arguments->due));
+            } catch (Exception $e) {
+                try {
+                    $task->due = DateTime::createFromFormat('Y-m-d', trim($arguments->due));
+                } catch (Exception $e) {
+                    $task->due = DateTime::createFromFormat('H:i', trim($arguments->due));
+                }
+            }
+
+            $changed = true;
+        } else {
+            $task->due = null;
+            $changed = true;
+        }
     }
 
     // update category
@@ -296,6 +312,14 @@ Route::add('/([0-9a-f]+)', function($id)
     }
 
     $task->deleteFromDatabase();
+
+    /**
+     * Delete the associated activity
+     */
+
+    if ($task->activity != null) {
+        $task->activity->deleteFromDatabase();
+    }
 
     // OK
     http_response_code(ResponseCode::NO_CONTENT);
@@ -349,12 +373,19 @@ Route::add('/([0-9a-f]+)/finish', function($id){
     // (Planned) authenticate
     if (isset($arguments->username)){
         // username must not be empty
-        if (empty(trim($arguments->username))) {
+        if (isset($_SESSION['user'])) {
+            $username = $_SESSION['user'];
+        } else {
             http_response_code(ResponseCode::UNAUTHORIZED);
             return;
         }
 
-        if (trim($arguments->username) != trim($task->getUsername())) {
+        if (empty(trim($username))) {
+            http_response_code(ResponseCode::UNAUTHORIZED);
+            return;
+        }
+
+        if (trim($username) != trim($task->getUsername())) {
             http_response_code(ResponseCode::UNAUTHORIZED);
             return;
         }

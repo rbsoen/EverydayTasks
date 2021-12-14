@@ -78,7 +78,7 @@ Date.prototype.getTimeString = function() {
 
 Date.prototype.getISODate = function() {
     const yr = this.getFullYear().toString().padStart(4, "0");
-    const md = this.getMonth().toString().padStart(2, "0");
+    const md = (this.getMonth()+1).toString().padStart(2, "0");
     const dt = this.getDate().toString().padStart(2, "0");
     return `${yr}-${md}-${dt}`;
 }
@@ -167,6 +167,7 @@ function getCookie(cname) {
         // initialize card, first element contains time
         let isTask = false;
         let time = activity.date_time;
+        let associated_task = activity.links.task;
         let style = "";
         if (activity.date_time === undefined) {
             time = activity.due;
@@ -279,6 +280,12 @@ function getCookie(cname) {
             edit: `/activity/${activity.id}/edit`,
             delete: `/activity/${activity.id}/delete`
         };
+
+        if (associated_task) {
+            card_links = {
+                edit: `/activity/${activity.id}/edit`
+            };
+        }
 
         if (isTask) {
             if (activity.links.activity !== undefined) {
@@ -782,7 +789,6 @@ function getCookie(cname) {
                                         id: "due-date",
                                         name: "due-date",
                                         type: "date",
-                                        value: due_date.getISODate(),
                                         required: true
                                     },
                                     {
@@ -790,7 +796,6 @@ function getCookie(cname) {
                                         id: "due-time",
                                         name: "due-time",
                                         type: "time",
-                                        value: due_date.getISOTime(),
                                         required: true
                                     }
                                 ]
@@ -836,6 +841,11 @@ function getCookie(cname) {
                 ]
             }
         );
+
+        if (task.due) {
+            edit_form.querySelector("#due-date").value = due_date.getISODate()
+            edit_form.querySelector("#due-time").value = due_date.getISOTime()
+        }
 
         // Add container for form overlay
         let edit_form_container = $.create(
