@@ -171,7 +171,8 @@ use EverydayTasks\Util;
             '',
             '',
             new DateTime(),
-            null
+            null,
+            $_SESSION['user']
         );
 
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
